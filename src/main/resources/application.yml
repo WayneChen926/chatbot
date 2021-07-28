@@ -1,0 +1,9 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  boot:
+    openCWB:
+      taipeiUrl: https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-061?Authorization=CWB-C905141A-8E3F-4DA2-BA48-260857AFFA41&format=JSON
