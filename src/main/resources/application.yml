@@ -6,4 +6,20 @@ server:
 spring:
   boot:
     openCWB:
-      taipeiUrl: https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-061?Authorization=CWB-C905141A-8E3F-4DA2-BA48-260857AFFA41&format=JSON
+#       36小時 全台預報 location locationName 臺北市
+      datastore: "aHR0cHM6Ly9vcGVuZGF0YS5jd2IuZ292LnR3L2FwaS92MS9yZXN0L2RhdGFzdG9yZS9GLUMwMDMyLTAwMT9BdXRob3JpemF0aW9uPUNXQi1DOTA1MTQxQS04RTNGLTREQTItQkE0OC0yNjA4NTdBRkZBNDEmZm9ybWF0PUpTT04="
+#      臺北市 各區預報
+      taipei: "aHR0cHM6Ly9vcGVuZGF0YS5jd2IuZ292LnR3L2FwaS92MS9yZXN0L2RhdGFzdG9yZS9GLUQwMDQ3LTA2MT9BdXRob3JpemF0aW9uPUNXQi1DOTA1MTQxQS04RTNGLTREQTItQkE0OC0yNjA4NTdBRkZBNDEmZm9ybWF0PUpTT04="
+  line:
+    channelSecret: "1fc5RUl7A3XA/D7gn6tk/j5UKnxZTlG1l8q7MUNffG7ULT8SsX7HIXulm11MpTxZ"
+    channelToken: "PjmL7qtAjF6AZWrEXNakiQHE43im4kgQ1mv9UT/NtrjT4pShMjBLEy5HLmCoLC5qKbNwhzSz7ABz02MTlVCVNGYqLNiLvaMAfOyqnPZSN8P+JLafbxovzQoao++VJD9iK1sM0RCKWTnmGnH2pBuH8mdyfxSj8gIODYGQ0aQxD9BXhqO/vhnl6r1QKJTgpYssmZdGxAMAlJr0xtL1Rob7GUGR8weUXMqW5pNL0V4Ket0="
+
+logging:
+    level:
+        com.opendata.chatbot: trace
+        com.opendata.chatbot.service: trace
+        org:
+            springframework:
+                web:
+                    client:
+                        RestTemplate: DEBUG

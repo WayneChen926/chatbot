@@ -1,35 +1,99 @@
 package com.opendata.chatbot.service.impl;
 
-import com.opendata.chatbot.entity.Center;
-import com.opendata.chatbot.entity.Location;
-import com.opendata.chatbot.entity.Locations;
-import com.opendata.chatbot.entity.Records;
-import com.opendata.chatbot.service.OpenDataCWB;
+import com.opendata.chatbot.entity.*;
+import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.util.JsonConverter;
+import com.opendata.chatbot.util.RestTemplateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-public class OpenDataCwbImpl implements OpenDataCWB {
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
+public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Autowired
-    Center center;
+    private Center center;
+
+    @Lookup
+    private Location getLocation(){
+        return new Location();
+    }
+
+    @Value("${spring.boot.openCWB.taipei}")
+    private String url;
 
     @Override
-    public String taipeiCwb(Center center) {
-        List<Location> locationList = new ArrayList<>();
-        center.getRecords().getLocations().forEach(locations->{
-            for (Location location : locations.getLocation()) {
-                if (location.getLocationName().equals("士林區")) {
-                    locationList.add(location);
+    public Center AllData() {
+        String body = null;
+        try {
+            body = RestTemplateUtil.GetNotValueTemplate(new String(Base64.getDecoder().decode(url), StandardCharsets.UTF_8)).getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Base64 decode Error :{}", e.getMessage());
+        }
+        return JsonConverter.toObject(body, Center.class);
+    }
+
+    @Override
+    public Location taipeiCwb(String district) {
+        AtomicReference<Location> location = new AtomicReference<>(getLocation());
+        //比對不到 物件就為null
+        location.set(null);
+        // 取出全部資料
+        center = AllData();
+        // 比對區
+        center.getRecords().getLocations().forEach(locations -> {
+            locations.getLocation().forEach(lo -> {
+                if (lo.getLocationName().equals(district)) {
+                    location.set(lo);
                 }
-                ;
-            }
+            });
         });
-        return JsonConverter.toJsonString(locationList);
+        return location.get();
+    }
+
+    @Override
+    public String weatherForecast(String district) {
+        var weatherForecastList = new ArrayList<WeatherForecast>();
+        Location location = taipeiCwb(district);
+        AtomicInteger n = new AtomicInteger();
+        System.out.println(location);
+        System.out.println(null != location);
+        if(null != location) {
+            location.getWeatherElement().forEach(weatherElement -> {
+                n.set(0);
+                WeatherForecast weatherForecast = new WeatherForecast();
+                weatherForecast.setDescription(weatherElement.getDescription());
+                weatherForecast.setElementName(weatherElement.getElementName());
+                weatherElement.getTime().forEach(time -> {
+                    n.getAndIncrement();
+                    if (n.get() < 2) {
+                        weatherForecast.setStartTime(time.getStartTime());
+                        weatherForecast.setDataTime(time.getDataTime());
+                        time.getElementValue().forEach(elementValue -> {
+                            // 過濾 Wx 數字單位
+                            if (!elementValue.getMeasures().equals("自定義 Wx 單位")) {
+                                weatherForecast.setValue(elementValue.getValue() + " " + elementValue.getMeasures());
+                            }
+                        });
+                    }
+                });
+                weatherForecastList.add(weatherForecast);
+            });
+            return JsonConverter.toJsonString(weatherForecastList);
+        }else{
+            return null;
+        }
     }
 }
