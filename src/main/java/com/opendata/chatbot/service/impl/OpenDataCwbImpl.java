@@ -68,8 +68,6 @@ public class OpenDataCwbImpl implements OpenDataCwb {
         var weatherForecastList = new ArrayList<WeatherForecast>();
         Location location = taipeiCwb(district);
         AtomicInteger n = new AtomicInteger();
-        System.out.println(location);
-        System.out.println(null != location);
         if(null != location) {
             location.getWeatherElement().forEach(weatherElement -> {
                 n.set(0);
@@ -84,7 +82,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                         time.getElementValue().forEach(elementValue -> {
                             // 過濾 Wx 數字單位
                             if (!elementValue.getMeasures().equals("自定義 Wx 單位")) {
-                                weatherForecast.setValue(elementValue.getValue() + " " + elementValue.getMeasures());
+                                weatherForecast.setValue(elementValue.getValue());
                             }
                         });
                     }

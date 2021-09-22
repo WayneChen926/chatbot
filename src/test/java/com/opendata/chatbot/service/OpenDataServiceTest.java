@@ -18,7 +18,7 @@ public class OpenDataServiceTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private OpenDataCwb openDataCWB;
+    private OpenDataCwb openDataCwb;
 
     @Autowired
     private LineService lineService;
@@ -27,6 +27,6 @@ public class OpenDataServiceTest {
     void weatherForecast() throws Exception {
 
         MvcResult mvcResult;
-        openDataCWB.weatherForecast("士林區");
+        openDataCwb.AllData();
     }
 }

@@ -1,5 +1,6 @@
 package com.opendata.chatbot.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.opendata.chatbot.entity.*;
 import com.opendata.chatbot.service.AesECB;
 import com.opendata.chatbot.service.LineService;
@@ -123,11 +124,39 @@ public class LineServiceImpl implements LineService {
             Messages messages2 = getMessages();
 
             if (openData != null) {
+                var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
+                });
                 messages1.setType("text");
                 messages1.setText("天氣預報");
 
                 messages2.setType("text");
-                messages2.setText(openData);
+
+                StringBuilder msg = new StringBuilder();
+                assert wList != null;
+                System.out.println("openData = "+openData);
+                for(WeatherForecast wf : wList){
+                    switch (wf.getElementName()) {
+                        case "PoP12h":
+                        case "PoP6h":
+                        case "RH":
+                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
+                            break;
+                        case "Wx":
+                        case "CI":
+                        case "WeatherDescription":
+                        case "WS":
+                        case "WD":
+                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
+                            break;
+                        case "AT":
+                        case "T":
+                        case "Td":
+                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
+                            break;
+                    }
+                }
+                System.out.println(msg.toString());
+                messages2.setText(msg.toString());
 
                 messagesList.add(messages1);
                 messagesList.add(messages2);
