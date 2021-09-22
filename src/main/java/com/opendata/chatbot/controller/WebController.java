@@ -17,9 +17,13 @@ public class WebController {
     @Autowired
     private AesECB aesECB;
 
+    /*
+     * LineBot WebHook 驗證回訊息
+     */
     @PostMapping("/webHook")
     public ResponseEntity<String> webHook(@RequestBody String requestBody,
                                           @RequestHeader("X-Line-Signature") String line_headers) {
-        return lineService.WebHook(requestBody,line_headers);
+        log.info("Begin Controller => {}", requestBody);
+        return lineService.WebHook(requestBody, line_headers);
     }
 }

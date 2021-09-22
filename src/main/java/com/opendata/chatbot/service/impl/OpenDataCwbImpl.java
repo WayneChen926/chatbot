@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -18,20 +16,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class OpenDataCwbImpl implements OpenDataCwb {
+
+    @Value("${spring.boot.openCWB.taipei}")
+    private String url;
 
     @Autowired
     private Center center;
 
     @Lookup
-    private Location getLocation(){
+    private Location getLocation() {
         return new Location();
     }
 
-    @Value("${spring.boot.openCWB.taipei}")
-    private String url;
+    @Lookup
+    private WeatherForecast getWeatherForecast() {
+        return new WeatherForecast();
+    }
 
     @Override
     public Center AllData() {
@@ -47,7 +49,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Override
     public Location taipeiCwb(String district) {
-        AtomicReference<Location> location = new AtomicReference<>(getLocation());
+        var location = new AtomicReference<Location>(getLocation());
         //比對不到 物件就為null
         location.set(null);
         // 取出全部資料
@@ -68,10 +70,10 @@ public class OpenDataCwbImpl implements OpenDataCwb {
         var weatherForecastList = new ArrayList<WeatherForecast>();
         Location location = taipeiCwb(district);
         AtomicInteger n = new AtomicInteger();
-        if(null != location) {
+        if (null != location) {
             location.getWeatherElement().forEach(weatherElement -> {
                 n.set(0);
-                WeatherForecast weatherForecast = new WeatherForecast();
+                var weatherForecast = getWeatherForecast();
                 weatherForecast.setDescription(weatherElement.getDescription());
                 weatherForecast.setElementName(weatherElement.getElementName());
                 weatherElement.getTime().forEach(time -> {
@@ -90,7 +92,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 weatherForecastList.add(weatherForecast);
             });
             return JsonConverter.toJsonString(weatherForecastList);
-        }else{
+        } else {
             return null;
         }
     }

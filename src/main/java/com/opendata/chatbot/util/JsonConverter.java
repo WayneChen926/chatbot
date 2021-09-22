@@ -13,21 +13,21 @@ public class JsonConverter {
         MAPPER = new ObjectMapper();
     }
 
-    public static<T> String toJsonString(T obj){
+    public static <T> String toJsonString(T obj) {
         MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
-        try{
+        try {
             log.info(obj.toString());
             return MAPPER.writeValueAsString(obj);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         }
     }
 
-    public static <T> T toObject(String json,Class<T> obj){
-        try{
-            return MAPPER.readValue(json,obj);
-        }catch (Exception e){
+    public static <T> T toObject(String json, Class<T> obj) {
+        try {
+            return MAPPER.readValue(json, obj);
+        } catch (Exception e) {
             log.error(e.getMessage());
             return null;
         }

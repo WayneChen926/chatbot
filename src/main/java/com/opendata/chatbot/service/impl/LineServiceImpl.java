@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -68,6 +67,8 @@ public class LineServiceImpl implements LineService {
             // 驗證line傳過來的訊息
             if (validateLineHeader(requestBody, line_headers)) {
                 replyMessage(requestBody);
+            } else {
+                new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
             }
         });
         return new ResponseEntity<String>(HttpStatus.OK);
@@ -101,19 +102,21 @@ public class LineServiceImpl implements LineService {
         log.trace("eventWrapper = {}", eventWrapper);
         String replyUrl = "https://api.line.me/v2/bot/message/reply";
 
-        String replyToken = null;
-//        eventWrapper.getEvents().forEach(event -> {
-//            replyToken.set(event.getReplyToken());
-//            this.event = event;
-//        });
-        for (Event event : eventWrapper.getEvents()) {
-            replyToken = event.getReplyToken();
+        var replyToken = new AtomicReference<String>();
+
+        // 取出User Event 的 資料，後續打API使用
+        eventWrapper.getEvents().forEach(event -> {
+            replyToken.set(event.getReplyToken());
             this.event = event;
-        }
+        });
+//        for (Event event : eventWrapper.getEvents()) {
+//            replyToken = event.getReplyToken();
+//            this.event = event;
+//        }
 
         //送出參數
-        HttpHeaders headers = headersUtil.setHeaders();
-        List<Messages> messagesList = new LinkedList<>();
+        var headers = headersUtil.setHeaders();
+        var messagesList = new LinkedList<Messages>();
 
         log.trace("event = {}", event);
         if (event.getMessage().getType().equals("text")) {
@@ -130,11 +133,9 @@ public class LineServiceImpl implements LineService {
                 messages1.setText("天氣預報");
 
                 messages2.setType("text");
-
                 StringBuilder msg = new StringBuilder();
                 assert wList != null;
-                System.out.println("openData = "+openData);
-                for(WeatherForecast wf : wList){
+                for (WeatherForecast wf : wList) {
                     switch (wf.getElementName()) {
                         case "PoP12h":
                         case "PoP6h":
@@ -155,7 +156,6 @@ public class LineServiceImpl implements LineService {
                             break;
                     }
                 }
-                System.out.println(msg.toString());
                 messages2.setText(msg.toString());
 
                 messagesList.add(messages1);
@@ -165,7 +165,7 @@ public class LineServiceImpl implements LineService {
                 messages1.setText("天氣預報地區 無此區域");
                 messagesList.add(messages1);
             }
-            replyMessage.setReplyToken(replyToken);
+            replyMessage.setReplyToken(replyToken.get());
             replyMessage.setMessages(messagesList);
 
             return RestTemplateUtil.PostTemplate(replyUrl, JsonConverter.toJsonString(replyMessage), headers);

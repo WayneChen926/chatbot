@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Component
@@ -18,7 +17,7 @@ public class HeadersUtil {
     @Autowired
     private AesECB aesECBImpl;
 
-    public HttpHeaders setHeaders(){
+    public HttpHeaders setHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         headers.add("Authorization", "Bearer {" + aesECBImpl.aesDecrypt(channelToken) + "}");

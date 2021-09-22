@@ -7,9 +7,9 @@ import java.util.Map;
 
 @Service
 public interface LineService {
-    ResponseEntity<String> WebHook(String requestBody,String line_headers);
+    ResponseEntity<String> WebHook(String requestBody, String line_headers);
 
-    boolean validateLineHeader(String requestBody,String lineHeaders);
+    boolean validateLineHeader(String requestBody, String lineHeaders);
 
     ResponseEntity<String> replyMessage(String requestBody) throws Exception;
 
