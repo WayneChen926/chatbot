@@ -1,8 +1,12 @@
 type Query {
-    shows(titleFilter: String): [Show]
+    showWeatherForecast(ds: String): [WeatherForecast]
 }
 
-type Show {
-    title: String
-    releaseYear: Int
+type WeatherForecast {
+    elementName :String
+    description: String
+    value :String
+    measures: String
+    startTime: String
+    dataTime: String
 }

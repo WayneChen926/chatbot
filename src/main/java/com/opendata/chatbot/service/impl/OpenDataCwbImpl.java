@@ -85,6 +85,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                             // 過濾 Wx 數字單位
                             if (!elementValue.getMeasures().equals("自定義 Wx 單位")) {
                                 weatherForecast.setValue(elementValue.getValue());
+                                weatherForecast.setMeasures(elementValue.getMeasures());
                             }
                         });
                     }
