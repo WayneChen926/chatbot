@@ -13,5 +13,5 @@ public interface LineService {
 
     ResponseEntity<String> replyMessage(String requestBody) throws Exception;
 
-    ResponseEntity<String> sendMessage(String json);
+    ResponseEntity<String> pushMessage(String json);
 }

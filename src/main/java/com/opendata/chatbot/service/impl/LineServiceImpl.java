@@ -37,6 +37,9 @@ public class LineServiceImpl implements LineService {
     @Value("${spring.line.channelToken}")
     private String channelToken;
 
+    @Value("${spring.line.replyUrl}")
+    private String replyUrl;
+
     @Autowired
     private AesECB aesECBImpl;
 
@@ -66,12 +69,13 @@ public class LineServiceImpl implements LineService {
         CompletableFuture.runAsync(() -> {
             // 驗證line傳過來的訊息
             if (validateLineHeader(requestBody, line_headers)) {
+                log.info("驗證成功");
                 replyMessage(requestBody);
             } else {
-                new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+                throw new RuntimeException("validateLineHeader line_headers validate Error");
             }
         });
-        return new ResponseEntity<String>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
@@ -79,7 +83,7 @@ public class LineServiceImpl implements LineService {
         log.info("requestBody = {}", requestBody);
         log.info("lineHeaders = {}", lineHeaders);
         String secret = aesECBImpl.aesDecrypt(channelSecret);
-        SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+        var key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
         Mac mac;
         try {
             mac = Mac.getInstance("HmacSHA256");
@@ -100,19 +104,18 @@ public class LineServiceImpl implements LineService {
     public ResponseEntity<String> replyMessage(String requestBody) {
         eventWrapper = JsonConverter.toObject(requestBody, EventWrapper.class);
         log.trace("eventWrapper = {}", eventWrapper);
-        String replyUrl = "https://api.line.me/v2/bot/message/reply";
+
+        // 回訊息 URL
+        String url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
 
         var replyToken = new AtomicReference<String>();
 
         // 取出User Event 的 資料，後續打API使用
+        this.event = null;
         eventWrapper.getEvents().forEach(event -> {
             replyToken.set(event.getReplyToken());
             this.event = event;
         });
-//        for (Event event : eventWrapper.getEvents()) {
-//            replyToken = event.getReplyToken();
-//            this.event = event;
-//        }
 
         //送出參數
         var headers = headersUtil.setHeaders();
@@ -121,7 +124,6 @@ public class LineServiceImpl implements LineService {
         log.trace("event = {}", event);
         if (event.getMessage().getType().equals("text")) {
             String openData = openDataCwb.weatherForecast(event.getMessage().getText());
-            log.info("openData = {}", openData);
 
             Messages messages1 = getMessages();
             Messages messages2 = getMessages();
@@ -135,7 +137,7 @@ public class LineServiceImpl implements LineService {
                 messages2.setType("text");
                 StringBuilder msg = new StringBuilder();
                 assert wList != null;
-                for (WeatherForecast wf : wList) {
+                wList.forEach(wf -> {
                     switch (wf.getElementName()) {
                         case "PoP12h":
                         case "PoP6h":
@@ -155,7 +157,7 @@ public class LineServiceImpl implements LineService {
                             msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
                             break;
                     }
-                }
+                });
                 messages2.setText(msg.toString());
 
                 messagesList.add(messages1);
@@ -168,16 +170,16 @@ public class LineServiceImpl implements LineService {
             replyMessage.setReplyToken(replyToken.get());
             replyMessage.setMessages(messagesList);
 
-            return RestTemplateUtil.PostTemplate(replyUrl, JsonConverter.toJsonString(replyMessage), headers);
+            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
         } else if (event.getMessage().getType().equals("location")) {
-            return RestTemplateUtil.PostTemplate(replyUrl, JsonConverter.toJsonString(replyMessage), headers);
+            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
         } else {
             return null;
         }
     }
 
     @Override
-    public ResponseEntity<String> sendMessage(String json) {
+    public ResponseEntity<String> pushMessage(String json) {
         HttpHeaders headers = headersUtil.setHeaders();
 
         return null;
