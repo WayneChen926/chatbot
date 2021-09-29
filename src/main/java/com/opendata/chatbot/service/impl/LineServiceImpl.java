@@ -82,14 +82,13 @@ public class LineServiceImpl implements LineService {
     public boolean validateLineHeader(String requestBody, String lineHeaders) {
         log.info("requestBody = {}", requestBody);
         log.info("lineHeaders = {}", lineHeaders);
-        String secret = aesECBImpl.aesDecrypt(channelSecret);
+        var secret = aesECBImpl.aesDecrypt(channelSecret);
         var key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
-        Mac mac;
         try {
-            mac = Mac.getInstance("HmacSHA256");
+            var mac = Mac.getInstance("HmacSHA256");
             mac.init(key);
             byte[] source = requestBody.getBytes(StandardCharsets.UTF_8);
-            String signature = Base64.encodeBase64String(mac.doFinal(source));
+            var signature = Base64.encodeBase64String(mac.doFinal(source));
             if (signature.equals(lineHeaders)) {
                 return true;
             }
@@ -106,7 +105,7 @@ public class LineServiceImpl implements LineService {
         log.trace("eventWrapper = {}", eventWrapper);
 
         // 回訊息 URL
-        String url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
+        var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
 
         var replyToken = new AtomicReference<String>();
 
@@ -123,10 +122,10 @@ public class LineServiceImpl implements LineService {
 
         log.trace("event = {}", event);
         if (event.getMessage().getType().equals("text")) {
-            String openData = openDataCwb.weatherForecast(event.getMessage().getText());
+            var openData = openDataCwb.weatherForecast(event.getMessage().getText());
 
-            Messages messages1 = getMessages();
-            Messages messages2 = getMessages();
+            var messages1 = getMessages();
+            var messages2 = getMessages();
 
             if (openData != null) {
                 var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
@@ -135,7 +134,7 @@ public class LineServiceImpl implements LineService {
                 messages1.setText("天氣預報");
 
                 messages2.setType("text");
-                StringBuilder msg = new StringBuilder();
+                var msg = new StringBuilder();
                 assert wList != null;
                 wList.forEach(wf -> {
                     switch (wf.getElementName()) {
@@ -180,7 +179,7 @@ public class LineServiceImpl implements LineService {
 
     @Override
     public ResponseEntity<String> pushMessage(String json) {
-        HttpHeaders headers = headersUtil.setHeaders();
+        var headers = headersUtil.setHeaders();
 
         return null;
     }

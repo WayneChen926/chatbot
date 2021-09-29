@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 public class UserService {
     public String saveUserId(Source source) throws ExecutionException, InterruptedException {
         Firestore firestore = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult>collectionApiFuture = firestore.collection("userId").document(source.getUserId()).set(source);
+        ApiFuture<WriteResult> collectionApiFuture = firestore.collection("userId").document(source.getUserId()).set(source);
         return collectionApiFuture.get().getUpdateTime().toString();
     }
 

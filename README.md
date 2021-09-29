@@ -4,6 +4,13 @@
 - 整理後判斷關鍵字地區，透過Line回覆
 
 
+### 版本
+- Java 11
+- SpringBoot 2.5.4
+- Jackson 2
+- Gradle 7.2
+- Junit 5
+
 ## 使用工具
 #### 這個專案使用到工具有：
 | [SpringBoot](https://spring.io/projects/spring-boot) | [GraphQL](https://graphql.org/)  | [DGS](https://graphql.org/) | [Line Message API](https://developers.line.biz/en/docs/messaging-api/overview/)

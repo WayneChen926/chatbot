@@ -68,8 +68,8 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     @Override
     public String weatherForecast(String district) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
-        Location location = taipeiCwb(district);
-        AtomicInteger n = new AtomicInteger();
+        var location = taipeiCwb(district);
+        var n = new AtomicInteger();
         if (null != location) {
             location.getWeatherElement().forEach(weatherElement -> {
                 n.set(0);

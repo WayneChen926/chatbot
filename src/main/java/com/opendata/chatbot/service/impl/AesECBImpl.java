@@ -109,9 +109,9 @@ public class AesECBImpl implements AesECB {
      */
     public byte[] aesEncryptToBytes(String content, String encryptKey) {
         try {
-            KeyGenerator kgen = KeyGenerator.getInstance("AES");
+            var kgen = KeyGenerator.getInstance("AES");
             kgen.init(128);
-            Cipher cipher = Cipher.getInstance(ALGORITHMSTR);
+            var cipher = Cipher.getInstance(ALGORITHMSTR);
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(encryptKey.getBytes(), "AES"));
 
             return cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
@@ -143,10 +143,10 @@ public class AesECBImpl implements AesECB {
      */
     public String aesDecryptByBytes(byte[] encryptBytes, String decryptKey) {
         try {
-            KeyGenerator kgen = KeyGenerator.getInstance("AES");
+            var kgen = KeyGenerator.getInstance("AES");
             kgen.init(128);
 
-            Cipher cipher = Cipher.getInstance(ALGORITHMSTR);
+            var cipher = Cipher.getInstance(ALGORITHMSTR);
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(decryptKey.getBytes(), "AES"));
             byte[] decryptBytes = cipher.doFinal(encryptBytes);
             return new String(decryptBytes);
