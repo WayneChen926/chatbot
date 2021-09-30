@@ -23,6 +23,4 @@ public class User {
     private LocalDateTime createTime;
     @Field("type")
     private String type;
-    @Field("log")
-    private String log;
 }

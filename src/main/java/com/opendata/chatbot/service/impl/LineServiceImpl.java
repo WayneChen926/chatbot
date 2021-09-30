@@ -81,7 +81,8 @@ public class LineServiceImpl implements LineService {
             // 驗證line傳過來的訊息
             if (validateLineHeader(requestBody, line_headers)) {
                 log.info("驗證成功");
-                replyMessage(requestBody);
+                var rm = replyMessage(requestBody);
+                log.info("replyMessage Finish = {}",rm);
             } else {
                 throw new RuntimeException("validateLineHeader line_headers validate Error");
             }
@@ -112,11 +113,13 @@ public class LineServiceImpl implements LineService {
 
     @Override
     public ResponseEntity<String> replyMessage(String requestBody) {
-        eventWrapper = JsonConverter.toObject(requestBody, EventWrapper.class);
-        log.trace("eventWrapper = {}", eventWrapper);
-
         // 回訊息 URL
         var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
+        //送出參數
+        var headers = headersUtil.setHeaders();
+        var messagesList = new LinkedList<Messages>();
+        eventWrapper = JsonConverter.toObject(requestBody, EventWrapper.class);
+        log.trace("eventWrapper = {}", eventWrapper);
 
         var replyToken = new AtomicReference<String>();
         var userId = new AtomicReference<String>();;
@@ -136,70 +139,77 @@ public class LineServiceImpl implements LineService {
                 user.setId(userId.get());
                 user.setCreateTime(LocalDateTime.now());
                 user.setType(event.getType());
-                user.setLog(requestBody);
                 userServiceImpl.saveUser(user);
             }
         });
 
-        //送出參數
-        var headers = headersUtil.setHeaders();
-        var messagesList = new LinkedList<Messages>();
 
         log.trace("event = {}", event);
         if (event.getMessage().getType().equals("text")) {
-            var openData = openDataCwb.weatherForecast(event.getMessage().getText());
-
-            var messages1 = getMessages();
-            var messages2 = getMessages();
-
-            if (openData != null) {
-                var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
-                });
-                messages1.setType("text");
-                messages1.setText("天氣預報");
-
-                messages2.setType("text");
-                var msg = new StringBuilder();
-                assert wList != null;
-                wList.forEach(wf -> {
-                    switch (wf.getElementName()) {
-                        case "PoP12h":
-                        case "PoP6h":
-                        case "RH":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
-                            break;
-                        case "Wx":
-                        case "CI":
-                        case "WeatherDescription":
-                        case "WS":
-                        case "WD":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
-                            break;
-                        case "AT":
-                        case "T":
-                        case "Td":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
-                            break;
-                    }
-                });
-                messages2.setText(msg.toString());
-
-                messagesList.add(messages1);
-                messagesList.add(messages2);
-            } else {
-                messages1.setType("text");
-                messages1.setText("天氣預報地區 無此區域");
-                messagesList.add(messages1);
-            }
-            replyMessage.setReplyToken(replyToken.get());
-            replyMessage.setMessages(messagesList);
-
-            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+            return replyTextDetermine(event,replyToken.get());
         } else if (event.getMessage().getType().equals("location")) {
             return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
         } else {
-            return null;
+            return new ResponseEntity<>(HttpStatus.OK);
         }
+    }
+
+    @Override
+    public ResponseEntity<String> replyTextDetermine(Event event, String replyToken) {
+        // 回訊息 URL
+        var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
+        //送出參數
+        var headers = headersUtil.setHeaders();
+        var messagesList = new LinkedList<Messages>();
+        // 取得氣象 Data
+        var openData = openDataCwb.weatherForecast(event.getMessage().getText());
+
+        var messages1 = getMessages();
+        var messages2 = getMessages();
+
+        if (null != openData ) {
+            var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
+            });
+            messages1.setType("text");
+            messages1.setText("天氣預報");
+
+            messages2.setType("text");
+            var msg = new StringBuilder();
+            assert wList != null;
+            wList.forEach(wf -> {
+                switch (wf.getElementName()) {
+                    case "PoP12h":
+                    case "PoP6h":
+                    case "RH":
+                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
+                        break;
+                    case "Wx":
+                    case "CI":
+                    case "WeatherDescription":
+                    case "WS":
+                    case "WD":
+                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
+                        break;
+                    case "AT":
+                    case "T":
+                    case "Td":
+                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
+                        break;
+                }
+            });
+            messages2.setText(msg.toString());
+
+            messagesList.add(messages1);
+            messagesList.add(messages2);
+        } else {
+            messages1.setType("text");
+            messages1.setText("天氣預報地區 無此區域");
+            messagesList.add(messages1);
+        }
+        replyMessage.setReplyToken(replyToken);
+        replyMessage.setMessages(messagesList);
+
+        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
     }
 
     @Override
