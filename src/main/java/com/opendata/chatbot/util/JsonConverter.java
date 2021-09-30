@@ -11,6 +11,7 @@ public class JsonConverter {
 
     static {
         MAPPER = new ObjectMapper();
+        MAPPER.findAndRegisterModules();
     }
 
     public static <T> String toJsonString(T obj) {

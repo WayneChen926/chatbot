@@ -1,8 +1,8 @@
 package com.opendata.chatbot.service.impl;
 
-import com.google.api.client.util.Value;
 import com.opendata.chatbot.service.AesECB;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -15,8 +15,9 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class AesECBImpl implements AesECB {
     //密钥 (需要前端和后端保持一致)
-    @Value("${spring.boot.Aes.key}")
-    private String KEY;
+    @Value("${spring.boot.aes.key}")
+    private String key;
+
     //算法
     private static final String ALGORITHMSTR = "AES/ECB/PKCS5Padding";
 
@@ -29,7 +30,7 @@ public class AesECBImpl implements AesECB {
      */
     public String aesDecrypt(String encrypt) {
         try {
-            return aesDecrypt(encrypt, new String(java.util.Base64.getDecoder().decode(KEY)));
+            return aesDecrypt(encrypt, new String(java.util.Base64.getDecoder().decode(key)));
         } catch (Exception e) {
             e.printStackTrace();
             return "";
@@ -45,7 +46,7 @@ public class AesECBImpl implements AesECB {
      */
     public String aesEncrypt(String content) {
         try {
-            return aesEncrypt(content, new String(java.util.Base64.getDecoder().decode(KEY)));
+            return aesEncrypt(content, new String(java.util.Base64.getDecoder().decode(key)));
         } catch (Exception e) {
             e.printStackTrace();
             return "";

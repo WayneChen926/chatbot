@@ -4,6 +4,9 @@ server:
     uri-encoding: UTF-8
 
 spring:
+  data:
+    mongodb:
+      uri: ${sm://mongodUri}
   cloud:
     gcp:
       secretmanager:
@@ -13,7 +16,7 @@ spring:
     jobName: pushTask
     jobGroupName: pushAllTask
   boot:
-    Aes:
+    aes:
       key: ${sm://aesKey}
     SecretManager:
       key: ${sm://serviceAccountKey}

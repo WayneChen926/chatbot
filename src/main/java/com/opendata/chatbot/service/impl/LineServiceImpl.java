@@ -1,10 +1,12 @@
 package com.opendata.chatbot.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.opendata.chatbot.dto.User;
 import com.opendata.chatbot.entity.*;
 import com.opendata.chatbot.service.AesECB;
 import com.opendata.chatbot.service.LineService;
 import com.opendata.chatbot.service.OpenDataCwb;
+import com.opendata.chatbot.service.UserService;
 import com.opendata.chatbot.util.HeadersUtil;
 import com.opendata.chatbot.util.JsonConverter;
 import com.opendata.chatbot.util.RestTemplateUtil;
@@ -23,6 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,6 +47,9 @@ public class LineServiceImpl implements LineService {
     private AesECB aesECBImpl;
 
     @Autowired
+    private UserService userServiceImpl;
+
+    @Autowired
     private HeadersUtil headersUtil;
 
     @Autowired
@@ -61,6 +67,11 @@ public class LineServiceImpl implements LineService {
     @Lookup
     private Messages getMessages() {
         return new Messages();
+    }
+
+    @Lookup
+    private User getUser(){
+        return new User();
     }
 
     @Override
@@ -108,12 +119,26 @@ public class LineServiceImpl implements LineService {
         var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
 
         var replyToken = new AtomicReference<String>();
+        var userId = new AtomicReference<String>();;
 
         // 取出User Event 的 資料，後續打API使用
         this.event = null;
         eventWrapper.getEvents().forEach(event -> {
             replyToken.set(event.getReplyToken());
+            userId.set(event.getSource().getUserId());
             this.event = event;
+        });
+
+        // 開執行序去存 User 資料 DB
+        CompletableFuture.runAsync(() -> {
+            User user = getUser();
+            if(userServiceImpl.getUserById(userId.get())==null){
+                user.setId(userId.get());
+                user.setCreateTime(LocalDateTime.now());
+                user.setType(event.getType());
+                user.setLog(requestBody);
+                userServiceImpl.saveUser(user);
+            }
         });
 
         //送出參數

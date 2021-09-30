@@ -1,5 +1,6 @@
 package com.opendata.chatbot.service;
 
+import com.opendata.chatbot.entity.Event;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
