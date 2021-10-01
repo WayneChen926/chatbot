@@ -3,6 +3,7 @@ package com.opendata.chatbot.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.opendata.chatbot.dto.User;
 import com.opendata.chatbot.entity.*;
+import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.AesECB;
 import com.opendata.chatbot.service.LineService;
 import com.opendata.chatbot.service.OpenDataCwb;
@@ -62,7 +63,10 @@ public class LineServiceImpl implements LineService {
     private ReplyMessage replyMessage;
 
     @Autowired
-    private OpenDataCwb openDataCwb;
+    private OpenDataRepo openDataRepo;
+
+    @Autowired
+    private OpenDataCwb openDataCwbImpl;
 
     @Lookup
     private Messages getMessages() {
@@ -162,11 +166,13 @@ public class LineServiceImpl implements LineService {
         var headers = headersUtil.setHeaders();
         var messagesList = new LinkedList<Messages>();
         // 取得氣象 Data
-        var openData = openDataCwb.weatherForecast(event.getMessage().getText());
+        var district = event.getMessage().getText();
+        // 更新資料
+        openDataCwbImpl.weatherForecast(district);
+        var openData = JsonConverter.toJsonString(openDataRepo.findByDistrict(district).get().getWeatherForecast());
 
         var messages1 = getMessages();
         var messages2 = getMessages();
-
         if (null != openData ) {
             var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
             });

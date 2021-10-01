@@ -1,7 +1,10 @@
 package com.opendata.chatbot.service.impl;
 
+import com.opendata.chatbot.dto.WeatherForecastDto;
 import com.opendata.chatbot.entity.*;
+import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.OpenDataCwb;
+import com.opendata.chatbot.util.Constant;
 import com.opendata.chatbot.util.JsonConverter;
 import com.opendata.chatbot.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,10 +25,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Value("${spring.boot.openCWB.taipei}")
-    private String url;
+    private String taipeiUrl;
+    @Value("${spring.boot.openCWB.newTaipei}")
+    private String newTaipeiUrl;
 
     @Autowired
-    private Center center;
+    private OpenDataRepo openDataRepo;
 
     @Lookup
     private Location getLocation() {
@@ -36,7 +43,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     }
 
     @Override
-    public Center AllData() {
+    public String AllData(String url) {
         String body = null;
         try {
             body = RestTemplateUtil.GetNotValueTemplate(new String(Base64.getDecoder().decode(url), StandardCharsets.UTF_8)).getBody();
@@ -44,16 +51,27 @@ public class OpenDataCwbImpl implements OpenDataCwb {
             e.printStackTrace();
             log.error("Base64 decode Error :{}", e.getMessage());
         }
-        return JsonConverter.toObject(body, Center.class);
+        return body;
     }
 
     @Override
     public Location taipeiCwb(String district) {
-        var location = new AtomicReference<Location>(getLocation());
+        var location = new AtomicReference<>(getLocation());
+        AtomicBoolean districtJudge = new AtomicBoolean(false);
         //比對不到 物件就為null
         location.set(null);
         // 取出全部資料
-        center = AllData();
+        Arrays.stream(Constant.NEWTAIPEI).forEach(s->{
+            if(s.contains(district)) {
+                districtJudge.set(true);
+            }
+        });
+        Center center = new Center();
+        if(districtJudge.get()){
+            center = JsonConverter.toObject(AllData(newTaipeiUrl),Center.class);
+        }else{
+            center = JsonConverter.toObject(AllData(taipeiUrl),Center.class);
+        }
         // 比對區
         center.getRecords().getLocations().forEach(locations -> {
             locations.getLocation().forEach(lo -> {
@@ -66,7 +84,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     }
 
     @Override
-    public String weatherForecast(String district) {
+    public WeatherForecastDto weatherForecast(String district) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
         var location = taipeiCwb(district);
         var n = new AtomicInteger();
@@ -92,7 +110,18 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 });
                 weatherForecastList.add(weatherForecast);
             });
-            return JsonConverter.toJsonString(weatherForecastList);
+            String uuid = UUID.randomUUID().toString();
+            var w = openDataRepo.findByDistrict(district);
+            var weatherForecastDto = new WeatherForecastDto();
+            if(w.isPresent()){
+                weatherForecastDto.setId(w.get().getId());
+            }else{
+                weatherForecastDto.setId(UUID.randomUUID().toString());
+            }
+            weatherForecastDto.setDistrict(district);
+            weatherForecastDto.setCreateTime(LocalDateTime.now());
+            weatherForecastDto.setWeatherForecast(weatherForecastList);
+            return openDataRepo.save(weatherForecastDto);
         } else {
             return null;
         }

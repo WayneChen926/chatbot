@@ -25,6 +25,7 @@ spring:
       datastore: ${sm://allWeatherForecast}
 #      臺北市 各區預報
       taipei: ${sm://taipeiWeatherForecast}
+      newTaipei: ${sm://newTaipeiWeatherForecast}
   line:
     replyUrl: ${sm://replyUrl}
     channelSecret: ${sm://channelSecret}

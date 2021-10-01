@@ -25,8 +25,5 @@ public class OpenDataServiceTest {
 
     @Test
     void weatherForecast() throws Exception {
-
-        MvcResult mvcResult;
-        openDataCwb.AllData();
     }
 }
