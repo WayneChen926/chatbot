@@ -12,9 +12,9 @@ spring:
       secretmanager:
         enabled: true
   quartz:
-    cron: 0 0 9 * * ?
-    jobName: pushTask
-    jobGroupName: pushAllTask
+    cron: 0 */30 * * * ?
+    jobName: openDataTask
+    jobGroupName: OpenDataTaskImpl
   boot:
     aes:
       key: ${sm://aesKey}

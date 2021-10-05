@@ -1,7 +1,7 @@
 package com.opendata.chatbot.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.opendata.chatbot.dto.User;
+import com.opendata.chatbot.dao.User;
 import com.opendata.chatbot.entity.*;
 import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.AesECB;
@@ -16,7 +16,6 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -58,9 +57,6 @@ public class LineServiceImpl implements LineService {
 
     @Autowired
     private Event event;
-
-    @Autowired
-    private ReplyMessage replyMessage;
 
     @Autowired
     private OpenDataRepo openDataRepo;
@@ -152,7 +148,7 @@ public class LineServiceImpl implements LineService {
         if (event.getMessage().getType().equals("text")) {
             return replyTextDetermine(event,replyToken.get());
         } else if (event.getMessage().getType().equals("location")) {
-            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+            return replyTextDetermine(event,replyToken.get());
         } else {
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -166,10 +162,7 @@ public class LineServiceImpl implements LineService {
         var headers = headersUtil.setHeaders();
         var messagesList = new LinkedList<Messages>();
         // 取得氣象 Data
-        var district = event.getMessage().getText();
-        // 更新資料
-        openDataCwbImpl.weatherForecast(district);
-        var openData = JsonConverter.toJsonString(openDataRepo.findByDistrict(district).get().getWeatherForecast());
+        var openData = JsonConverter.toJsonString(openDataRepo.findByDistrict(event.getMessage().getText()).get().getWeatherForecast());
 
         var messages1 = getMessages();
         var messages2 = getMessages();
@@ -212,8 +205,7 @@ public class LineServiceImpl implements LineService {
             messages1.setText("天氣預報地區 無此區域");
             messagesList.add(messages1);
         }
-        replyMessage.setReplyToken(replyToken);
-        replyMessage.setMessages(messagesList);
+        ReplyMessage replyMessage = new ReplyMessage(replyToken,messagesList);
 
         return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
     }

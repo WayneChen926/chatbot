@@ -1,7 +1,6 @@
-package com.opendata.chatbot.dto;
+package com.opendata.chatbot.dao;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.opendata.chatbot.entity.WeatherForecast;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,20 +9,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Document(collection = "weatherForecast")
+@Document(collection = "user")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WeatherForecastDto {
+public class User {
     @Id
     private String id;
-    @Field("district")
-    private String district;
-    @Field("weatherForecast")
-    private List<WeatherForecast> weatherForecast;
     @Field("createTime")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private LocalDateTime createTime;
+    @Field("type")
+    private String type;
 }

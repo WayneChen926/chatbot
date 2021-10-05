@@ -1,6 +1,6 @@
 package com.opendata.chatbot.service;
 
-import com.opendata.chatbot.dto.User;
+import com.opendata.chatbot.dao.User;
 
 import java.util.List;
 

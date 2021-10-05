@@ -1,6 +1,6 @@
 package com.opendata.chatbot.service.impl;
 
-import com.opendata.chatbot.dto.User;
+import com.opendata.chatbot.dao.User;
 import com.opendata.chatbot.repository.UserRepo;
 import com.opendata.chatbot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

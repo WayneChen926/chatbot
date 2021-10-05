@@ -1,6 +1,6 @@
 package com.opendata.chatbot.repository;
 
-import com.opendata.chatbot.dto.WeatherForecastDto;
+import com.opendata.chatbot.dao.WeatherForecastDto;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

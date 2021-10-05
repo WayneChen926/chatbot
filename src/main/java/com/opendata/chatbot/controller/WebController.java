@@ -1,17 +1,16 @@
 package com.opendata.chatbot.controller;
 
-import com.opendata.chatbot.dto.User;
-import com.opendata.chatbot.entity.Source;
-import com.opendata.chatbot.service.AesECB;
+import com.opendata.chatbot.dao.User;
 import com.opendata.chatbot.service.LineService;
+import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @Slf4j
@@ -23,6 +22,9 @@ public class WebController {
     @Autowired
     private UserService userServiceImpl;
 
+    @Autowired
+    private OpenDataCwb openDataCwbImpl;
+
     /*
      * LineBot WebHook 驗證回訊息
      */
@@ -33,7 +35,13 @@ public class WebController {
         return lineServiceImpl.WebHook(requestBody, line_headers);
     }
 
-    @GetMapping("/User")
+    @PostConstruct
+    private void updateWeatherForecast(){
+        openDataCwbImpl.weatherForecast("新北市");
+        openDataCwbImpl.weatherForecast("台北市");
+    }
+
+    @GetMapping("/user")
     public List<User> getAllUser(){
         return userServiceImpl.getAllUsers();
     }

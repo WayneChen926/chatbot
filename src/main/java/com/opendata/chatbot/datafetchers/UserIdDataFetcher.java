@@ -7,7 +7,6 @@ import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
 import com.opendata.chatbot.entity.WeatherForecast;
 import com.opendata.chatbot.repository.OpenDataRepo;
-import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.util.JsonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 

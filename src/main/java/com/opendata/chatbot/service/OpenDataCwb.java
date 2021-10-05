@@ -1,15 +1,15 @@
 package com.opendata.chatbot.service;
 
-import com.opendata.chatbot.dto.WeatherForecastDto;
-import com.opendata.chatbot.entity.Center;
 import com.opendata.chatbot.entity.Location;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface OpenDataCwb {
     String AllData(String url);
 
-    Location taipeiCwb(String district);
+    List<Location> taipeiCwb(String city);
 
-    WeatherForecastDto weatherForecast(String district);
+    void weatherForecast(String city);
 }

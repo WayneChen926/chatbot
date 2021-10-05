@@ -1,10 +1,11 @@
 package com.opendata.chatbot.service.impl;
 
-import com.opendata.chatbot.dto.WeatherForecastDto;
-import com.opendata.chatbot.entity.*;
+import com.opendata.chatbot.dao.WeatherForecastDto;
+import com.opendata.chatbot.entity.Center;
+import com.opendata.chatbot.entity.Location;
+import com.opendata.chatbot.entity.WeatherForecast;
 import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.OpenDataCwb;
-import com.opendata.chatbot.util.Constant;
 import com.opendata.chatbot.util.JsonConverter;
 import com.opendata.chatbot.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -55,40 +55,32 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     }
 
     @Override
-    public Location taipeiCwb(String district) {
-        var location = new AtomicReference<>(getLocation());
-        AtomicBoolean districtJudge = new AtomicBoolean(false);
-        //比對不到 物件就為null
-        location.set(null);
-        // 取出全部資料
-        Arrays.stream(Constant.NEWTAIPEI).forEach(s->{
-            if(s.contains(district)) {
-                districtJudge.set(true);
-            }
-        });
-        Center center = new Center();
-        if(districtJudge.get()){
-            center = JsonConverter.toObject(AllData(newTaipeiUrl),Center.class);
-        }else{
-            center = JsonConverter.toObject(AllData(taipeiUrl),Center.class);
+    public List<Location> taipeiCwb(String city) {
+        var locationList = new LinkedList<Location>();
+
+        Center center;
+        String[] district;
+        if (city.equals("新北市")) {
+            center = JsonConverter.toObject(AllData(newTaipeiUrl), Center.class);
+        } else {
+            center = JsonConverter.toObject(AllData(taipeiUrl), Center.class);
         }
         // 比對區
+        assert center != null;
         center.getRecords().getLocations().forEach(locations -> {
-            locations.getLocation().forEach(lo -> {
-                if (lo.getLocationName().equals(district)) {
-                    location.set(lo);
-                }
-            });
+            locationList.addAll(locations.getLocation());
         });
-        return location.get();
+        return locationList;
     }
 
     @Override
-    public WeatherForecastDto weatherForecast(String district) {
+    public void weatherForecast(String city) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
-        var location = taipeiCwb(district);
+        var locationList = taipeiCwb(city);
+        var district = new AtomicReference<String>(null);
         var n = new AtomicInteger();
-        if (null != location) {
+        locationList.forEach( location -> {
+            district.set(location.getLocationName());
             location.getWeatherElement().forEach(weatherElement -> {
                 n.set(0);
                 var weatherForecast = getWeatherForecast();
@@ -110,20 +102,20 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 });
                 weatherForecastList.add(weatherForecast);
             });
-            String uuid = UUID.randomUUID().toString();
-            var w = openDataRepo.findByDistrict(district);
             var weatherForecastDto = new WeatherForecastDto();
-            if(w.isPresent()){
+            var w = openDataRepo.findByDistrict(district.get());
+            if (w.isPresent()) {
                 weatherForecastDto.setId(w.get().getId());
-            }else{
+            } else {
                 weatherForecastDto.setId(UUID.randomUUID().toString());
             }
-            weatherForecastDto.setDistrict(district);
+            weatherForecastDto.setDistrict(district.get());
             weatherForecastDto.setCreateTime(LocalDateTime.now());
+            // 加入新數據
             weatherForecastDto.setWeatherForecast(weatherForecastList);
-            return openDataRepo.save(weatherForecastDto);
-        } else {
-            return null;
-        }
+            openDataRepo.save(weatherForecastDto);
+            // 清空
+            weatherForecastList.clear();
+        });
     }
 }
