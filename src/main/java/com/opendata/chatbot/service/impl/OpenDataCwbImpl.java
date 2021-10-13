@@ -26,8 +26,12 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Value("${spring.boot.openCWB.taipei}")
     private String taipeiUrl;
+
     @Value("${spring.boot.openCWB.newTaipei}")
     private String newTaipeiUrl;
+
+    @Value("${spring.boot.openCWB.taoyuan}")
+    private String taoyuanUrl;
 
     @Autowired
     private OpenDataRepo openDataRepo;
@@ -62,6 +66,8 @@ public class OpenDataCwbImpl implements OpenDataCwb {
         String[] district;
         if (city.equals("新北市")) {
             center = JsonConverter.toObject(AllData(newTaipeiUrl), Center.class);
+        } else if (city.equals("桃園市")) {
+            center = JsonConverter.toObject(AllData(taoyuanUrl), Center.class);
         } else {
             center = JsonConverter.toObject(AllData(taipeiUrl), Center.class);
         }
@@ -79,7 +85,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
         var locationList = taipeiCwb(city);
         var district = new AtomicReference<String>(null);
         var n = new AtomicInteger();
-        locationList.forEach( location -> {
+        locationList.forEach(location -> {
             district.set(location.getLocationName());
             location.getWeatherElement().forEach(weatherElement -> {
                 n.set(0);

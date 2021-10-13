@@ -26,6 +26,7 @@ spring:
 #      臺北市 各區預報
       taipei: ${sm://taipeiWeatherForecast}
       newTaipei: ${sm://newTaipeiWeatherForecast}
+      taoyuan: ${sm://taoyuanWeatherForecast}
   line:
     replyUrl: ${sm://replyUrl}
     channelSecret: ${sm://channelSecret}
