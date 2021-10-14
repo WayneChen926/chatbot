@@ -146,7 +146,9 @@ public class LineServiceImpl implements LineService {
         if (event.getMessage().getType().equals("text")) {
             return replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
         } else if (event.getMessage().getType().equals("location")) {
-            return replyWeatherForecast(event.getMessage().getAddress(), event.getReplyToken());
+            var address = event.getMessage().getAddress();
+            var dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
+            return replyWeatherForecast(dist, event.getReplyToken());
         } else {
             return new ResponseEntity<>(HttpStatus.OK);
         }
