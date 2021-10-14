@@ -1,6 +1,5 @@
 package com.opendata.chatbot.service;
 
-import com.opendata.chatbot.entity.Event;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +11,7 @@ public interface LineService {
 
     ResponseEntity<String> replyMessage(String requestBody) throws Exception;
 
-    ResponseEntity<String> replyTextDetermine(Event event);
-
-    ResponseEntity<String> replyLocationDetermine(Event event);
+    ResponseEntity<String> replyWeatherForecast(String dist, String replyToken);
 
     ResponseEntity<String> pushMessage(String json);
 }

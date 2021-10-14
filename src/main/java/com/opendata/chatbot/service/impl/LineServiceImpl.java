@@ -144,74 +144,16 @@ public class LineServiceImpl implements LineService {
 
         log.trace("event = {}", event);
         if (event.getMessage().getType().equals("text")) {
-            return replyTextDetermine(event);
+            return replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
         } else if (event.getMessage().getType().equals("location")) {
-            return replyLocationDetermine(event);
+            return replyWeatherForecast(event.getMessage().getAddress(), event.getReplyToken());
         } else {
             return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 
     @Override
-    public ResponseEntity<String> replyTextDetermine(Event event) {
-        // 回訊息 URL
-        var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
-        //送出參數
-        var headers = headersUtil.setHeaders();
-        var messagesList = new LinkedList<Messages>();
-        // 取得氣象 Data
-        var openData = JsonConverter.toJsonString(openDataRepo.findByDistrict(event.getMessage().getText()).get().getWeatherForecast());
-
-        var messages1 = getMessages();
-        var messages2 = getMessages();
-        if (null != openData) {
-            var wList = JsonConverter.toArrayObject(openData, new TypeReference<LinkedList<WeatherForecast>>() {
-            });
-            messages1.setType("text");
-            messages1.setText(event.getMessage().getText() + " 天氣預報");
-
-            messages2.setType("text");
-            var msg = new StringBuilder();
-            assert wList != null;
-            wList.forEach(wf -> {
-                switch (wf.getElementName()) {
-                    case "PoP12h":
-                    case "PoP6h":
-                    case "RH":
-                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
-                        break;
-                    case "Wx":
-                    case "CI":
-                    case "WeatherDescription":
-                    case "WS":
-                    case "WD":
-                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
-                        break;
-                    case "AT":
-                    case "T":
-                    case "Td":
-                        msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
-                        break;
-                }
-            });
-            messages2.setText(msg.toString());
-
-            messagesList.add(messages1);
-            messagesList.add(messages2);
-        } else {
-            messages1.setType("text");
-            messages1.setText("天氣預報地區 無此區域");
-            messagesList.add(messages1);
-        }
-        ReplyMessage replyMessage = new ReplyMessage(event.getReplyToken(), messagesList);
-
-        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
-    }
-
-    @Override
-    public ResponseEntity<String> replyLocationDetermine(Event event) {
-        String address = event.getMessage().getAddress();
-        String dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
+    public ResponseEntity<String> replyWeatherForecast(String dist, String replyToken) {
         // 回訊息 URL
         var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
         //送出參數
@@ -261,7 +203,7 @@ public class LineServiceImpl implements LineService {
             messages1.setText("天氣預報地區 無此區域");
             messagesList.add(messages1);
         }
-        ReplyMessage replyMessage = new ReplyMessage(event.getReplyToken(), messagesList);
+        ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
 
         return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
     }
