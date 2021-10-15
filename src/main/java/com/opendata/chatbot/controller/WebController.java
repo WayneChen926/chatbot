@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 @RestController
@@ -35,14 +34,8 @@ public class WebController {
         return lineServiceImpl.WebHook(requestBody, line_headers);
     }
 
-    @PostConstruct
-    private void updateWeatherForecast(){
-        openDataCwbImpl.weatherForecast("新北市");
-        openDataCwbImpl.weatherForecast("台北市");
-    }
-
     @GetMapping("/user")
-    public List<User> getAllUser(){
+    public List<User> getAllUser() {
         return userServiceImpl.getAllUsers();
     }
 }
