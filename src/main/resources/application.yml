@@ -19,7 +19,8 @@ spring:
     aes:
       key: ${sm://aesKey}
     SecretManager:
-      key: ${sm://serviceAccountKey}
+      bucket: ${sm://bucket}
+      serviceAccountKey: ${sm://serviceAccountKey}
     openCWB:
 #       36小時 全台預報 location locationName 臺北市
       datastore: ${sm://allWeatherForecast}
