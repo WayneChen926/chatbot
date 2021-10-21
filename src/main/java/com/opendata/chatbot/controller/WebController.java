@@ -7,13 +7,13 @@ import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
@@ -41,18 +41,18 @@ public class WebController {
         return lineServiceImpl.WebHook(requestBody, line_headers);
     }
 
-    @GetMapping("/user")
+    @GetMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<User> getAllUser() {
         return userServiceImpl.getAllUsers();
     }
 
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", produces = MediaType.APPLICATION_JSON_VALUE)
     public String uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
         return firebaseStoreImpl.uploadFiles(file);
     }
 
-    @PostMapping("/download/{fileName}")
-    public Map<String, Map<String, Object>> downloadFile(@PathVariable String fileName) throws IOException {
+    @PostMapping(value = "/download/{fileName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String downloadFile(@PathVariable String fileName) throws IOException {
         return firebaseStoreImpl.download(fileName);
     }
 }

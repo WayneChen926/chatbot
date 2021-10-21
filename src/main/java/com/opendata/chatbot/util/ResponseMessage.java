@@ -12,10 +12,10 @@ public class ResponseMessage {
         mm = new LinkedHashMap<>();
     }
 
-    public static Map<String, Map<String, Object>> message(Integer code, String Message) {
+    public static String message(Integer code, String Message) {
         mm.put("code", code);
         mm.put("message", Message);
         m.put("status", mm);
-        return m;
+        return JsonConverter.toJsonString(m);
     }
 }

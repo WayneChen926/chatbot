@@ -1,5 +1,6 @@
 package com.opendata.chatbot.errorHandler;
 
+import com.opendata.chatbot.util.JsonConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -20,10 +21,10 @@ public class ErrorMessageHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ErrorMessage.class})
-    public final Map<String, Map<String, Object>> errorMessageHandler(ErrorMessage ex) {
+    public final String errorMessageHandler(ErrorMessage ex) {
         mm.put("code", ex.getCode());
         mm.put("message", ex.getMessage());
         m.put("status", mm);
-        return m;
+        return JsonConverter.toJsonString(m);
     }
 }
