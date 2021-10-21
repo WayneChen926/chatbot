@@ -23,7 +23,7 @@ public class ErrorMessageHandler {
     public final Map<String, Map<String, Object>> errorMessageHandler(ErrorMessage ex) {
         mm.put("code", ex.getCode());
         mm.put("message", ex.getMessage());
-        m.put("Status", mm);
+        m.put("status", mm);
         return m;
     }
 }
