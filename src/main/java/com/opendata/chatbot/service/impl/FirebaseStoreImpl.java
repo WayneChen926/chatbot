@@ -17,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -48,17 +47,19 @@ public class FirebaseStoreImpl implements FirebaseStore {
     @Override
     public String uploadFiles(MultipartFile file) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket(this.bucket);
+        String uuid = UUID.randomUUID().toString();
         Map<String, String> map = new HashMap<>();
-        map.put("firebaseStorageDownloadTokens", UUID.randomUUID().toString());
+        map.put("firebaseStorageDownloadTokens", uuid);
         BlobId blobId = BlobId.of(this.bucket, Objects.requireNonNull(file.getOriginalFilename()));
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
                 .setMetadata(map)
                 .setContentType(file.getContentType())
                 .build();
-        storage.create(blobInfo, file.getInputStream());
-        return ResponseMessage.message(200, "上傳檔案成功" + file.getOriginalFilename());
+        var blob = storage.create(blobInfo, file.getInputStream());
+        return ResponseMessage.message(200,
+                blob.getMediaLink().replace("https://storage.googleapis.com/download/storage/v1","https://firebasestorage.googleapis.com/v0")
+                +"&token="+uuid);
     }
-
 
     @Override
     public String download(String fileName) throws IOException {
@@ -73,8 +74,8 @@ public class FirebaseStoreImpl implements FirebaseStore {
         if (blob == null) {
             throw new ErrorMessage("ERR01001", "沒有這個檔案可以下載");
         }
-        blob.downloadTo(Paths.get(destFilePath));
-        return ResponseMessage.message(200, "下載檔案成功");
+
+        return ResponseMessage.message(200, blob.getMediaLink());
     }
 
     private String getExtension(String fileName) {

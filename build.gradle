@@ -19,10 +19,8 @@ repositories {
 	mavenCentral()
 }
 
-jar {
-	manifest {
-		attributes 'Main-Class': 'com.opendata.chatbot'
-	}
+repositories {
+	google()
 }
 
 dependencies {
