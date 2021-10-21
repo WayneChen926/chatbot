@@ -48,9 +48,6 @@ public class FirebaseStoreImpl implements FirebaseStore {
     @Override
     public String uploadFiles(MultipartFile file) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket(this.bucket);
-//        InputStream content = new ByteArrayInputStream(file.getBytes());
-//        Blob blob = bucket.create(file.getOriginalFilename(), content, file.getContentType());
-//        return blob.getMediaLink();
         Map<String, String> map = new HashMap<>();
         map.put("firebaseStorageDownloadTokens", UUID.randomUUID().toString());
         BlobId blobId = BlobId.of(this.bucket, Objects.requireNonNull(file.getOriginalFilename()));
@@ -58,7 +55,7 @@ public class FirebaseStoreImpl implements FirebaseStore {
                 .setMetadata(map)
                 .setContentType(file.getContentType())
                 .build();
-        storage.writer(blobInfo, Storage.BlobWriteOption.md5Match());
+        storage.create(blobInfo, file.getInputStream());
         return ResponseMessage.message(200, "上傳檔案成功" + file.getOriginalFilename());
     }
 
