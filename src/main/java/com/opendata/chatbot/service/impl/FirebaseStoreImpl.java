@@ -3,7 +3,6 @@ package com.opendata.chatbot.service.impl;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
-import com.google.firebase.cloud.StorageClient;
 import com.opendata.chatbot.errorHandler.ErrorMessage;
 import com.opendata.chatbot.service.FirebaseStore;
 import com.opendata.chatbot.util.ResponseMessage;
@@ -17,10 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class FirebaseStoreImpl implements FirebaseStore {
@@ -38,7 +34,7 @@ public class FirebaseStoreImpl implements FirebaseStore {
             InputStream is = new ByteArrayInputStream(serviceAccountKey.getBytes(StandardCharsets.UTF_8));
             storage = StorageOptions.newBuilder().
                     setCredentials(GoogleCredentials.fromStream(is)).
-                    setProjectId("datastore-37bc0").build().getService();
+                    setProjectId(bucket).build().getService();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -46,19 +42,18 @@ public class FirebaseStoreImpl implements FirebaseStore {
 
     @Override
     public String uploadFiles(MultipartFile file) throws IOException {
-        Bucket bucket = StorageClient.getInstance().bucket(this.bucket);
         String uuid = UUID.randomUUID().toString();
         Map<String, String> map = new HashMap<>();
         map.put("firebaseStorageDownloadTokens", uuid);
-        BlobId blobId = BlobId.of(this.bucket, Objects.requireNonNull(file.getOriginalFilename()));
+        BlobId blobId = BlobId.of(this.bucket, Objects.requireNonNull(Base64.getEncoder().encodeToString(Objects.requireNonNull(file.getOriginalFilename()).getBytes(StandardCharsets.UTF_8))));
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
                 .setMetadata(map)
                 .setContentType(file.getContentType())
                 .build();
-        var blob = storage.create(blobInfo, file.getInputStream());
+        var blob = storage.create(blobInfo, file.getBytes());
         return ResponseMessage.message(200,
-                blob.getMediaLink().replace("https://storage.googleapis.com/download/storage/v1","https://firebasestorage.googleapis.com/v0")
-                +"&token="+uuid);
+                blob.getMediaLink().replace("https://storage.googleapis.com/download/storage/v1", "https://firebasestorage.googleapis.com/v0")
+                        + "&token=" + uuid);
     }
 
     @Override
