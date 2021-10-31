@@ -51,9 +51,8 @@ public class FirebaseStoreImpl implements FirebaseStore {
                 .setContentType(file.getContentType())
                 .build();
         var blob = storage.create(blobInfo, file.getBytes());
-        return ResponseMessage.message(200,
-                blob.getMediaLink().replace("https://storage.googleapis.com/download/storage/v1", "https://firebasestorage.googleapis.com/v0")
-                        + "&token=" + uuid);
+        return blob.getMediaLink().replace("https://storage.googleapis.com/download/storage/v1", "https://firebasestorage.googleapis.com/v0")
+                        + "&token=" + uuid;
     }
 
     @Override

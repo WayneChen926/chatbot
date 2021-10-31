@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,7 +116,9 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 weatherForecastDto.setId(UUID.randomUUID().toString());
             }
             weatherForecastDto.setDistrict(district.get());
-            weatherForecastDto.setCreateTime(LocalDateTime.now());
+//            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//            String time = df.format(new Timestamp(System.currentTimeMillis()));
+            weatherForecastDto.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
             // 加入新數據
             weatherForecastDto.setWeatherForecast(weatherForecastList);
             openDataRepo.save(weatherForecastDto);
