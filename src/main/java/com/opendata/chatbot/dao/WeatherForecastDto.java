@@ -23,6 +23,6 @@ public class WeatherForecastDto {
     @Field("weatherForecast")
     private List<WeatherForecast> weatherForecast;
     @Field("createTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String createTime;
 }
