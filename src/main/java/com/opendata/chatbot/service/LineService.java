@@ -9,7 +9,7 @@ public interface LineService {
 
     boolean validateLineHeader(String requestBody, String lineHeaders);
 
-    ResponseEntity<String> replyMessage(String requestBody) throws Exception;
+    void replyMessage(String requestBody) throws Exception;
 
     ResponseEntity<String> replyWeatherForecast(String dist, String replyToken);
 

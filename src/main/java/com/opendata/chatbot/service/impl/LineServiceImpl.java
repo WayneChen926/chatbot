@@ -3,6 +3,7 @@ package com.opendata.chatbot.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.opendata.chatbot.dao.User;
 import com.opendata.chatbot.entity.*;
+import com.opendata.chatbot.errorHandler.ErrorMessage;
 import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.AesECB;
 import com.opendata.chatbot.service.LineService;
@@ -81,8 +82,7 @@ public class LineServiceImpl implements LineService {
             // 驗證line傳過來的訊息
             if (validateLineHeader(requestBody, line_headers)) {
                 log.info("驗證成功");
-                var rm = replyMessage(requestBody);
-                log.info("replyMessage Finish = {}", rm);
+                replyMessage(requestBody);
             } else {
                 throw new RuntimeException("validateLineHeader line_headers validate Error");
             }
@@ -112,7 +112,7 @@ public class LineServiceImpl implements LineService {
     }
 
     @Override
-    public ResponseEntity<String> replyMessage(String requestBody) {
+    public void replyMessage(String requestBody) {
         // 回訊息 URL
         var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
         //送出參數
@@ -128,30 +128,34 @@ public class LineServiceImpl implements LineService {
         eventWrapper.getEvents().forEach(event -> {
             userId.set(event.getSource().getUserId());
             this.event = event;
-        });
+            log.info("event = {}", event);
 
-        // 開執行序去存 User 資料 DB
-        CompletableFuture.runAsync(() -> {
-            User user = getUser();
-            if (userServiceImpl.getUserById(userId.get()) == null) {
-                user.setId(userId.get());
-                user.setCreateTime(LocalDateTime.now());
-                user.setType(event.getType());
-                userServiceImpl.saveUser(user);
+            // 開執行序去存 User 資料 DB
+            CompletableFuture.runAsync(() -> {
+                User user = getUser();
+                if (userServiceImpl.getUserById(userId.get()) == null) {
+                    user.setId(userId.get());
+                    user.setCreateTime(LocalDateTime.now());
+                    user.setType(event.getType());
+                    userServiceImpl.saveUser(user);
+                }
+            });
+
+            if (event.getMessage().getType().equals("text")) {
+                replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
+            } else if (event.getMessage().getType().equals("location")) {
+                var address = event.getMessage().getAddress();
+                var dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
+                replyWeatherForecast(dist, event.getReplyToken());
+            } else {
+                var messages = getMessages();
+                messages.setType("text");
+                messages.setText("無法解析內容");
+                messagesList.add(messages);
+                RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(new ReplyMessage(event.getReplyToken(), messagesList)), headers);
             }
         });
 
-
-        log.trace("event = {}", event);
-        if (event.getMessage().getType().equals("text")) {
-            return replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
-        } else if (event.getMessage().getType().equals("location")) {
-            var address = event.getMessage().getAddress();
-            var dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
-            return replyWeatherForecast(dist, event.getReplyToken());
-        } else {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
     }
 
     @Override
