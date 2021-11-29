@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -34,6 +33,8 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Value("${spring.boot.openCWB.taoyuan}")
     private String taoyuanUrl;
+    @Value("${spring.boot.openCWB.keelung}")
+    private String keelungUrl;
 
     @Autowired
     private OpenDataRepo openDataRepo;
@@ -61,30 +62,33 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     }
 
     @Override
-    public List<Location> taipeiCwb(String city) {
+    public List<Location> cityCwb(String city) {
         var locationList = new LinkedList<Location>();
 
-        Center center;
+        Center center = null;
         String[] district;
         if (city.equals("新北市")) {
             center = JsonConverter.toObject(AllData(newTaipeiUrl), Center.class);
         } else if (city.equals("桃園市")) {
             center = JsonConverter.toObject(AllData(taoyuanUrl), Center.class);
-        } else {
+        } else if (city.equals("台北市")) {
             center = JsonConverter.toObject(AllData(taipeiUrl), Center.class);
+        } else if (city.equals("基隆市")) {
+            center = JsonConverter.toObject(AllData(keelungUrl), Center.class);
         }
         // 比對區
-        assert center != null;
-        center.getRecords().getLocations().forEach(locations -> {
-            locationList.addAll(locations.getLocation());
-        });
+        if (center != null) {
+            center.getRecords().getLocations().forEach(locations -> {
+                locationList.addAll(locations.getLocation());
+            });
+        }
         return locationList;
     }
 
     @Override
     public void weatherForecast(String city) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
-        var locationList = taipeiCwb(city);
+        var locationList = cityCwb(city);
         var district = new AtomicReference<String>(null);
         var n = new AtomicInteger();
         locationList.forEach(location -> {
@@ -111,12 +115,13 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 weatherForecastList.add(weatherForecast);
             });
             var weatherForecastDto = new WeatherForecastDto();
-            var w = openDataRepo.findByDistrict(district.get());
+            var w = openDataRepo.findByDistrictAndCity(district.get(), city);
             if (w.isPresent()) {
                 weatherForecastDto.setId(w.get().getId());
             } else {
                 weatherForecastDto.setId(UUID.randomUUID().toString());
             }
+            weatherForecastDto.setCity(city);
             weatherForecastDto.setDistrict(district.get());
             weatherForecastDto.setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             // 加入新數據

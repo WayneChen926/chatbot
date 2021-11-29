@@ -18,6 +18,8 @@ import java.util.List;
 public class WeatherForecastDto {
     @Id
     private String id;
+    @Field("city")
+    private String city;
     @Field("district")
     private String district;
     @Field("weatherForecast")

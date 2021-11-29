@@ -10,3 +10,13 @@ type WeatherForecast {
     startTime: String
     dataTime: String
 }
+
+input User{
+    id :String
+    createTime: String
+}
+
+type Users{
+    id:String!
+    createTime:String!
+}

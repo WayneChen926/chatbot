@@ -1,0 +1,7 @@
+type Mutation {
+    createPromotion(input: User): Users
+    updatePromotion(User:ID!, input: User): Users
+    canDeletePromotion(User: ID!): Users
+    deletePromotion(User: ID!): Users
+}
+
