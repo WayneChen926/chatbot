@@ -2,6 +2,7 @@ package com.opendata.chatbot.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.opendata.chatbot.dao.User;
+import com.opendata.chatbot.dao.WeatherForecastDto;
 import com.opendata.chatbot.entity.*;
 import com.opendata.chatbot.errorHandler.ErrorMessage;
 import com.opendata.chatbot.repository.OpenDataRepo;
@@ -28,6 +29,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -145,8 +147,9 @@ public class LineServiceImpl implements LineService {
                 replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
             } else if (event.getMessage().getType().equals("location")) {
                 var address = event.getMessage().getAddress();
+                var city = address.substring(address.indexOf("市") - 2, address.indexOf("市") + 1);
                 var dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
-                replyWeatherForecast(dist, event.getReplyToken());
+                replyWeatherLocation(city, dist, event.getReplyToken());
             } else {
                 var messages = getMessages();
                 messages.setType("text");
@@ -170,75 +173,74 @@ public class LineServiceImpl implements LineService {
         // 多筆結果
         if (low.size() > 1) {
             low.forEach(openData -> {
-                var messages = getMessages();
-                var msg = new StringBuilder();
-                messages.setType("text");
-                openData.get().getWeatherForecast().forEach(wf -> {
-                    switch (wf.getElementName()) {
-                        case "PoP12h":
-                        case "PoP6h":
-                        case "RH":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
-                            break;
-                        case "Wx":
-                        case "CI":
-                        case "WeatherDescription":
-                        case "WS":
-                        case "WD":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
-                            break;
-                        case "AT":
-                        case "T":
-                        case "Td":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
-                            break;
-                    }
-                    messages.setText((openData.get().getCity() + " " + dist + "\n天氣預報:\n" + msg));
-                });
+                var messages = weatherForecastLineMessageReply(openData.get());
                 messagesList.add(messages);
             });
             ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
             return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+        } else if (low.size() == 0) {
+            var messages = getMessages();
+            messages.setType("text");
+            messages.setText("無法解析輸入內容，請輸入地區。Ex: 士林區、羅東鎮、礁溪鄉等");
+            messagesList.add(messages);
+            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(new ReplyMessage(replyToken, messagesList)), headers);
         } else {
-
             // 單比結果
             var openData = low.get(0);
-            var messages = getMessages();
-            if (openData.isPresent()) {
-                messages.setType("text");
-                var msg = new StringBuilder();
-                openData.get().getWeatherForecast().forEach(wf -> {
-                    switch (wf.getElementName()) {
-                        case "PoP12h":
-                        case "PoP6h":
-                        case "RH":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
-                            break;
-                        case "Wx":
-                        case "CI":
-                        case "WeatherDescription":
-                        case "WS":
-                        case "WD":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
-                            break;
-                        case "AT":
-                        case "T":
-                        case "Td":
-                            msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
-                            break;
-                    }
-                });
-                messages.setText((openData.get().getCity() + " " + dist + "\n天氣預報:\n" + msg));
-                messagesList.add(messages);
-            } else {
-                messages.setType("text");
-                messages.setText("天氣預報地區 無此區域");
-                messagesList.add(messages);
-            }
-            ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
-
-            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+            var messages = weatherForecastLineMessageReply(openData.get());
+            messagesList.add(messages);
         }
+        ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
+
+        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+    }
+
+    @Override
+    public ResponseEntity<String> replyWeatherLocation(String city, String dist, String replyToken) {
+        // 回訊息 URL
+        var url = new String(java.util.Base64.getDecoder().decode(replyUrl), StandardCharsets.UTF_8);
+        //送出參數
+        var headers = headersUtil.setHeaders();
+        var messagesList = new LinkedList<Messages>();
+        var openData = openDataRepo.findByDistrictAndCity(dist, city);
+        // 單比結果
+        var messages = weatherForecastLineMessageReply(openData.get());
+
+        messagesList.add(messages);
+
+        ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
+
+        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+    }
+
+    @Override
+    public Messages weatherForecastLineMessageReply(WeatherForecastDto openData) {
+        var messages = getMessages();
+        var msg = new StringBuilder();
+        messages.setType("text");
+        openData.getWeatherForecast().forEach(wf -> {
+            switch (wf.getElementName()) {
+                case "PoP12h":
+                case "PoP6h":
+                case "RH":
+                    msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("%").append("\n");
+                    break;
+                case "Wx":
+                case "CI":
+                case "WeatherDescription":
+                case "WS":
+                case "WD":
+                    msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\n");
+                    break;
+                case "AT":
+                case "T":
+                case "Td":
+                    msg.append(wf.getDescription()).append(" : ").append(wf.getValue()).append("\u2103").append("\n");
+                    break;
+            }
+            messages.setText((openData.getCity() + " " + openData.getDistrict() + "\n天氣預報:\n" + msg));
+        });
+        return messages;
     }
 
     @Override

@@ -1,7 +1,11 @@
 package com.opendata.chatbot.service;
 
+import com.opendata.chatbot.dao.WeatherForecastDto;
+import com.opendata.chatbot.entity.Messages;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public interface LineService {
@@ -13,5 +17,7 @@ public interface LineService {
 
     ResponseEntity<String> replyWeatherForecast(String dist, String replyToken);
 
+    ResponseEntity<String> replyWeatherLocation(String city, String dist, String replyToken);
+    Messages weatherForecastLineMessageReply(WeatherForecastDto openData);
     ResponseEntity<String> pushMessage(String json);
 }
