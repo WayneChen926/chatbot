@@ -18,6 +18,8 @@ public interface LineService {
     ResponseEntity<String> replyWeatherForecast(String dist, String replyToken);
 
     ResponseEntity<String> replyWeatherLocation(String city, String dist, String replyToken);
+
     Messages weatherForecastLineMessageReply(WeatherForecastDto openData);
+
     ResponseEntity<String> pushMessage(String json);
 }

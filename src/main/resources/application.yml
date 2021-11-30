@@ -29,6 +29,7 @@ spring:
       newTaipei: ${sm://newTaipeiWeatherForecast}
       taoyuan: ${sm://taoyuanWeatherForecast}
       keelung: ${sm://keelungWeatherForecast}
+      yilan: ${sm://yilanWeatherForecast}
   line:
     replyUrl: ${sm://replyUrl}
     channelSecret: ${sm://channelSecret}

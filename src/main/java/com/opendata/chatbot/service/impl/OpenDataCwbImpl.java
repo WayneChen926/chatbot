@@ -33,8 +33,12 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Value("${spring.boot.openCWB.taoyuan}")
     private String taoyuanUrl;
+
     @Value("${spring.boot.openCWB.keelung}")
     private String keelungUrl;
+
+    @Value("${spring.boot.openCWB.yilan}")
+    private String yilanUrl;
 
     @Autowired
     private OpenDataRepo openDataRepo;
@@ -67,14 +71,22 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
         Center center = null;
         String[] district;
-        if (city.equals("新北市")) {
-            center = JsonConverter.toObject(AllData(newTaipeiUrl), Center.class);
-        } else if (city.equals("桃園市")) {
-            center = JsonConverter.toObject(AllData(taoyuanUrl), Center.class);
-        } else if (city.equals("台北市")) {
-            center = JsonConverter.toObject(AllData(taipeiUrl), Center.class);
-        } else if (city.equals("基隆市")) {
-            center = JsonConverter.toObject(AllData(keelungUrl), Center.class);
+        switch (city) {
+            case "新北市":
+                center = JsonConverter.toObject(AllData(newTaipeiUrl), Center.class);
+                break;
+            case "桃園市":
+                center = JsonConverter.toObject(AllData(taoyuanUrl), Center.class);
+                break;
+            case "台北市":
+                center = JsonConverter.toObject(AllData(taipeiUrl), Center.class);
+                break;
+            case "基隆市":
+                center = JsonConverter.toObject(AllData(keelungUrl), Center.class);
+                break;
+            case "宜蘭縣":
+                center = JsonConverter.toObject(AllData(yilanUrl), Center.class);
+                break;
         }
         // 比對區
         if (center != null) {

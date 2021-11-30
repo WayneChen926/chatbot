@@ -147,8 +147,21 @@ public class LineServiceImpl implements LineService {
                 replyWeatherForecast(event.getMessage().getText(), event.getReplyToken());
             } else if (event.getMessage().getType().equals("location")) {
                 var address = event.getMessage().getAddress();
-                var city = address.substring(address.indexOf("市") - 2, address.indexOf("市") + 1);
-                var dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
+                String city = "";
+                String dist = "";
+                if (address.contains("市") && address.contains("區")) {
+                    city = address.substring(address.indexOf("市") - 2, address.indexOf("市") + 1);
+                    dist = address.substring(address.indexOf("市") + 1, address.indexOf("區") + 1);
+                } else {
+                    city = address.substring(address.indexOf("縣") - 2, address.indexOf("縣") + 1);
+                    if (address.contains("市")) {
+                        dist = address.substring(address.indexOf("縣") + 1, address.indexOf("市") + 1);
+                    } else if (address.contains("鄉")) {
+                        dist = address.substring(address.indexOf("縣") + 1, address.indexOf("鄉") + 1);
+                    } else if (address.contains("鎮")) {
+                        dist = address.substring(address.indexOf("縣") + 1, address.indexOf("鎮") + 1);
+                    }
+                }
                 replyWeatherLocation(city, dist, event.getReplyToken());
             } else {
                 var messages = getMessages();
