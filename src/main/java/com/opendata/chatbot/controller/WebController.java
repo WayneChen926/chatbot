@@ -52,13 +52,8 @@ public class WebController {
     }
 
     @PostMapping(value = "/upload", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile file/*, @RequestParam("test1") String test1, @RequestParam("test2") String test2,
-                                          @RequestParam("test3") String test3, @RequestParam("test4") String test4*/) throws IOException {
+    public Map<String, Object> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
         Map<String, Object> m = new LinkedHashMap<>();
-//        m.put("test1", test1);
-//        m.put("test2", test2);
-//        m.put("test3", test3);
-//        m.put("test4", test4);
         m.put("imageUrl", firebaseStoreImpl.uploadFiles(file));
         log.info("json = {}", m);
         return m;

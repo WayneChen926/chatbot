@@ -2,7 +2,6 @@ server:
   port: 8080
   tomcat:
     uri-encoding: UTF-8
-
 spring:
   data:
     mongodb:
@@ -37,8 +36,7 @@ spring:
 
 logging:
   level:
-    com.opendata.chatbot: trace
-    com.opendata.chatbot.service: trace
+    root: info
     org:
       springframework:
         web:

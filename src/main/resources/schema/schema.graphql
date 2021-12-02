@@ -1,5 +1,5 @@
 type Query {
-    showWeatherForecast(ds: String): [WeatherForecast]
+    showWeatherForecast(city: String ,ds: String): [WeatherForecast]
 }
 
 type WeatherForecast {
@@ -13,10 +13,12 @@ type WeatherForecast {
 
 input User{
     id :String
-    createTime: String
+    createTime:LocalDateTime
+    type:String
 }
 
 type Users{
     id:String!
-    createTime:String!
+    createTime:LocalDateTime!
+    type:String!
 }

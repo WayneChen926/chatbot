@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -138,7 +139,6 @@ public class LineServiceImpl implements LineService {
                 if (userServiceImpl.getUserById(userId.get()) == null) {
                     user.setId(userId.get());
                     user.setCreateTime(LocalDateTime.now());
-                    user.setType(event.getType());
                     userServiceImpl.saveUser(user);
                 }
             });
@@ -194,7 +194,7 @@ public class LineServiceImpl implements LineService {
         } else if (low.size() == 0) {
             var messages = getMessages();
             messages.setType("text");
-            messages.setText("無法解析輸入內容，請輸入地區。Ex: 士林區、羅東鎮、礁溪鄉等");
+            messages.setText("無法解析輸入內容，請輸入地區。Ex: 士林區、羅東鎮、礁溪鄉、宜蘭市等");
             messagesList.add(messages);
             return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(new ReplyMessage(replyToken, messagesList)), headers);
         } else {

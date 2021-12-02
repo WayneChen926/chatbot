@@ -31,14 +31,15 @@ public class UserIdDataFetcher {
     private UserService userServiceImpl;
 
     @DgsQuery
-    public List<WeatherForecast> showWeatherForecast(@InputArgument String ds) {
-        var low = openDataRepo.findByDistrict(ds);
-        log.info("low :{}", low);
+    public List<WeatherForecast> showWeatherForecast(@InputArgument String city, @InputArgument String ds) {
+        var optionalWeatherForecastDto = openDataRepo.findByDistrictAndCity(ds, city);
+        log.info("optionalWeatherForecastDto :{}", optionalWeatherForecastDto);
         AtomicReference<List<WeatherForecast>> s = new AtomicReference<>();
-        low.forEach(openData -> {
-            s.set(openData.get().getWeatherForecast());
-        });
-        return s.get();
+        List<WeatherForecast> weatherForecastList = null;
+        if (optionalWeatherForecastDto.isPresent()) {
+            weatherForecastList = optionalWeatherForecastDto.get().getWeatherForecast();
+        }
+        return weatherForecastList;
     }
 
     @DgsMutation
