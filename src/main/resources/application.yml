@@ -3,9 +3,11 @@ server:
   tomcat:
     uri-encoding: UTF-8
 spring:
+# mongo 設定
   data:
     mongodb:
       uri: ${sm://mongodUri}
+# redis 設定
   cloud:
     gcp:
       secretmanager:
