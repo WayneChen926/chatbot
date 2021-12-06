@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,7 +14,10 @@ public class RestTemplateUtil {
     private final static RestTemplate restTemplate;
 
     static {
-        restTemplate = new RestTemplate();
+        var requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(10 * 1000);
+        requestFactory.setReadTimeout(10 * 1000);
+        restTemplate = new RestTemplate(requestFactory);
     }
 
     public static ResponseEntity<String> PostTemplate(String url, String json, HttpHeaders headers) {
