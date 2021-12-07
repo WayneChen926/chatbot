@@ -29,15 +29,15 @@ public class RedisConfig extends CachingConfigurerSupport {
         redisTemplate.setConnectionFactory(connectionFactory);
         return redisTemplate;
     }
-//
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory factory) {
-        RedisSerializationContext.SerializationPair<Object> pair = RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer());
-        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeValuesWith(pair)
-                .entryTtl(Duration.ofSeconds(30)); //過期時間
-        return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(factory)).cacheDefaults(defaultCacheConfig).build();
-    }
+////
+//    @Bean
+//    public CacheManager cacheManager(RedisConnectionFactory factory) {
+//        RedisSerializationContext.SerializationPair<Object> pair = RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer());
+//        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+//                .serializeValuesWith(pair)
+//                .entryTtl(Duration.ofSeconds(30)); //過期時間
+//        return RedisCacheManager.builder(RedisCacheWriter.nonLockingRedisCacheWriter(factory)).cacheDefaults(defaultCacheConfig).build();
+//    }
 //
 //    @Bean
 //    public RedissonClient getRedisson(@Value("${spring.redis.host}") String host, @Value("${spring.redis.port}") String port, @Value("${spring.redis.password}") String password) {
