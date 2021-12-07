@@ -8,6 +8,18 @@ spring:
     mongodb:
       uri: ${sm://mongodUri}
 # redis 設定
+  redis:
+    database: 0
+    host: ${sm://redisHost}
+    port: ${sm://redisPort}
+    password: ${sm://redisPassword}
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
   cloud:
     gcp:
       secretmanager:

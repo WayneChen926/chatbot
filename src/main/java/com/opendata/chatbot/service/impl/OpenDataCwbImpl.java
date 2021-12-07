@@ -128,8 +128,8 @@ public class OpenDataCwbImpl implements OpenDataCwb {
             });
             var weatherForecastDto = new WeatherForecastDto();
             var w = openDataRepo.findByDistrictAndCity(district.get(), city);
-            if (w.isPresent()) {
-                weatherForecastDto.setId(w.get().getId());
+            if (w != null) {
+                weatherForecastDto.setId(w.getId());
             } else {
                 weatherForecastDto.setId(UUID.randomUUID().toString());
             }

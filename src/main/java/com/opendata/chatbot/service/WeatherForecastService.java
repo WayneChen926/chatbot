@@ -1,12 +1,11 @@
-package com.opendata.chatbot.repository;
+package com.opendata.chatbot.service;
 
 import com.opendata.chatbot.dao.WeatherForecastDto;
-import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface OpenDataRepo extends MongoRepository<WeatherForecastDto,String> {
+public interface WeatherForecastService {
     List<WeatherForecastDto> findByDistrict(String district);
     WeatherForecastDto findByDistrictAndCity(String district, String city);
 }

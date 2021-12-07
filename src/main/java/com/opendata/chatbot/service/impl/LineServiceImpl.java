@@ -6,10 +6,7 @@ import com.opendata.chatbot.dao.WeatherForecastDto;
 import com.opendata.chatbot.entity.*;
 import com.opendata.chatbot.errorHandler.ErrorMessage;
 import com.opendata.chatbot.repository.OpenDataRepo;
-import com.opendata.chatbot.service.AesECB;
-import com.opendata.chatbot.service.LineService;
-import com.opendata.chatbot.service.OpenDataCwb;
-import com.opendata.chatbot.service.UserService;
+import com.opendata.chatbot.service.*;
 import com.opendata.chatbot.util.HeadersUtil;
 import com.opendata.chatbot.util.JsonConverter;
 import com.opendata.chatbot.util.RestTemplateUtil;
@@ -63,10 +60,10 @@ public class LineServiceImpl implements LineService {
     private Event event;
 
     @Autowired
-    private OpenDataRepo openDataRepo;
+    private OpenDataCwb openDataCwbImpl;
 
     @Autowired
-    private OpenDataCwb openDataCwbImpl;
+    private WeatherForecastService weatherForecastServiceImpl;
 
     @Lookup
     private Messages getMessages() {
@@ -181,12 +178,12 @@ public class LineServiceImpl implements LineService {
         //送出參數
         var headers = headersUtil.setHeaders();
         var messagesList = new LinkedList<Messages>();
-        var low = openDataRepo.findByDistrict(dist);
+        var low = weatherForecastServiceImpl.findByDistrict(dist);
         // 取得氣象 Data
         // 多筆結果
         if (low.size() > 1) {
             low.forEach(openData -> {
-                var messages = weatherForecastLineMessageReply(openData.get());
+                var messages = weatherForecastLineMessageReply(openData);
                 messagesList.add(messages);
             });
             ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
@@ -200,7 +197,7 @@ public class LineServiceImpl implements LineService {
         } else {
             // 單比結果
             var openData = low.get(0);
-            var messages = weatherForecastLineMessageReply(openData.get());
+            var messages = weatherForecastLineMessageReply(openData);
             messagesList.add(messages);
         }
         ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
@@ -215,9 +212,9 @@ public class LineServiceImpl implements LineService {
         //送出參數
         var headers = headersUtil.setHeaders();
         var messagesList = new LinkedList<Messages>();
-        var openData = openDataRepo.findByDistrictAndCity(dist, city);
+        var openData = weatherForecastServiceImpl.findByDistrictAndCity(dist, city);
         // 單比結果
-        var messages = weatherForecastLineMessageReply(openData.get());
+        var messages = weatherForecastLineMessageReply(openData);
 
         messagesList.add(messages);
 
