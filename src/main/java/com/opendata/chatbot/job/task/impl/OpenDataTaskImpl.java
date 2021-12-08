@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -30,7 +31,12 @@ public class OpenDataTaskImpl implements OpenDataTask {
     public void doRun() {
         log.info("=== OpenDataTaskImpl start === ");
         Arrays.stream(Constant.CITY).forEach(city -> {
-            openDataCwbImpl.weatherForecast(city);
+            try {
+                Thread.sleep(2000);
+                openDataCwbImpl.weatherForecast(city);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
 
         openDataRepo.findAll().forEach(weatherForecastDto -> {

@@ -7,6 +7,9 @@ spring:
   data:
     mongodb:
       uri: ${sm://mongodUri}
+# rabbitmq 設定
+  rabbitmq:
+    addresses: ${sm://rabbitmqUrl}
 # redis 設定
   redis:
     database: 0

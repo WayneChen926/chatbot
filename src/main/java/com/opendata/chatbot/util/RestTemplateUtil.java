@@ -15,8 +15,8 @@ public class RestTemplateUtil {
 
     static {
         var requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(20000);
-        requestFactory.setConnectionRequestTimeout(20000);
+        requestFactory.setConnectTimeout(30000);
+        requestFactory.setConnectionRequestTimeout(30000);
         requestFactory.setReadTimeout(30000);
         restTemplate = new RestTemplate(requestFactory);
     }
