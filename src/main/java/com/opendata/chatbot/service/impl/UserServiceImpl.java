@@ -26,14 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        var obj = redisTemplate.opsForValue().get("AllUser");
-        if (obj != null) {
-            return (List<User>) obj;
-        } else {
-            var userList = userRepo.findAll();
-            redisTemplate.opsForValue().set("AllUser", userList);
-            return userList;
-        }
+        return userRepo.findAll();
     }
 
     @Override

@@ -35,8 +35,10 @@ public class WeatherForecastServiceImpl implements WeatherForecastService {
         } else {
             log.info("connect mongodb");
             var optionalList = OpenDataRepo.findByDistrict(district);
-            redisTemplate.opsForValue().set(district, optionalList);
-            redisTemplate.expire(district, Duration.ofMinutes(30));
+            if (optionalList.size() != 0) {
+                redisTemplate.opsForValue().set(district, optionalList);
+//                redisTemplate.expire(district, Duration.ofHours(1));
+            }
             return optionalList;
         }
     }
@@ -50,7 +52,10 @@ public class WeatherForecastServiceImpl implements WeatherForecastService {
         } else {
             log.info("connect mongodb");
             var optionalWeatherForecastDto = OpenDataRepo.findByDistrictAndCity(district, city);
-            redisTemplate.opsForValue().set(city + "_" + district, optionalWeatherForecastDto);
+            if (optionalWeatherForecastDto != null) {
+                redisTemplate.opsForValue().set(city + "_" + district, optionalWeatherForecastDto);
+                redisTemplate.expire(city + "_" + district, Duration.ofHours(1));
+            }
             return optionalWeatherForecastDto;
         }
     }
