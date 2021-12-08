@@ -9,6 +9,7 @@ import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.util.JsonConverter;
 import com.opendata.chatbot.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,11 +43,6 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Autowired
     private OpenDataRepo openDataRepo;
-
-    @Lookup
-    private Location getLocation() {
-        return new Location();
-    }
 
     @Lookup
     private WeatherForecast getWeatherForecast() {

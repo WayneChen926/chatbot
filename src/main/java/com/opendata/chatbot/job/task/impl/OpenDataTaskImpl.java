@@ -6,13 +6,12 @@ import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.util.Constant;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -27,22 +26,30 @@ public class OpenDataTaskImpl implements OpenDataTask {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     @Override
     public void doRun() {
         log.info("=== OpenDataTaskImpl start === ");
         Arrays.stream(Constant.CITY).forEach(city -> {
             try {
                 Thread.sleep(2000);
+                rabbitTemplate.convertAndSend("tpu.queue", city,
+                        correlationData -> {
+                            correlationData.getMessageProperties().setDelay(2000);
+                            return correlationData;
+                        });
                 openDataCwbImpl.weatherForecast(city);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.error("RabbitTemplate doRun :{}", e.getMessage());
             }
         });
 
+        // 寫入 Redis
         openDataRepo.findAll().forEach(weatherForecastDto -> {
-            var weatherForecastDtoList = openDataRepo.findByDistrict(weatherForecastDto.getDistrict());
             redisTemplate.delete(weatherForecastDto.getDistrict());
-            redisTemplate.opsForValue().set(weatherForecastDto.getDistrict(), weatherForecastDtoList);
+            redisTemplate.opsForValue().set(weatherForecastDto.getDistrict(), openDataRepo.findByDistrict(weatherForecastDto.getDistrict()));
         });
 
         log.info("=== OpenDataTaskImpl end === ");
