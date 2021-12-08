@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -54,21 +52,9 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Override
     public String AllData(String url) {
-        WebClient webClient = WebClient.builder()
-                .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(configurer -> configurer
-                                .defaultCodecs()
-                                .maxInMemorySize(20 * 1024 * 1024))
-                        .build())
-                .build();
         String body = null;
         try {
-            body = webClient.get()
-                    .uri(new String(Base64.getDecoder().decode(url), StandardCharsets.UTF_8))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .timeout(Duration.ofMinutes(1))
-                    .block();
+            body = RestTemplateUtil.GetNotValueTemplate(new String(Base64.getDecoder().decode(url), StandardCharsets.UTF_8)).getBody();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Base64 decode Error :{}", e.getMessage());
