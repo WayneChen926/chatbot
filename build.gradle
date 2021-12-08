@@ -28,6 +28,7 @@ dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis:2.6.1'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: '2.5.4'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-amqp', version: '2.6.1'
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.0'
 //	implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.16.5'
