@@ -28,7 +28,7 @@ spring:
       secretmanager:
         enabled: true
   quartz:
-    cron: 0 0 */1 * * ?
+    cron: 0 0 */2 * * ?
     jobName: openDataTask
     jobGroupName: OpenDataTaskImpl
   boot:
@@ -41,11 +41,7 @@ spring:
 #       36小時 全台預報 location locationName 臺北市
       datastore: ${sm://allWeatherForecast}
 #      臺北市 各區預報
-      taipei: ${sm://taipeiWeatherForecast}
-      newTaipei: ${sm://newTaipeiWeatherForecast}
-      taoyuan: ${sm://taoyuanWeatherForecast}
-      keelung: ${sm://keelungWeatherForecast}
-      yilan: ${sm://yilanWeatherForecast}
+      cwbUrl: ${sm://taipeiWeatherForecast},${sm://newTaipeiWeatherForecast},${sm://taoyuanWeatherForecast},${sm://keelungWeatherForecast},${sm://yilanWeatherForecast},${sm://taichungWeatherForecast},${sm://hsinchuctWeatherForecast},${sm://hsinchuCityWeatherForecast},${sm://miaoliWeatherForecast},${sm://changhuaWeatherForecast},${sm://nantouWeatherForecast},${sm://yunlinWeatherForecast},${sm://chiayiCountyWeatherForecast},${sm://chiayiCityWeatherForecast},${sm://tainanWeatherForecast},${sm://kaohsiungWeatherForecast},${sm://pingtungWeatherForecast},${sm://taitungWeatherForecast},${sm://hualienWeatherForecast},${sm://penghuWeatherForecast},${sm://kinmenWeatherForecast},${sm://matsuLslandsWeatherForecast}
   line:
     replyUrl: ${sm://replyUrl}
     channelSecret: ${sm://channelSecret}

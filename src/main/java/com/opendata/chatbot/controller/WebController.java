@@ -5,7 +5,6 @@ import com.opendata.chatbot.service.FirebaseStore;
 import com.opendata.chatbot.service.LineService;
 import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.service.UserService;
-import com.opendata.chatbot.util.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -13,9 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

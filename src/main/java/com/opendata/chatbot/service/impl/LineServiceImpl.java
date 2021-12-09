@@ -1,11 +1,11 @@
 package com.opendata.chatbot.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.opendata.chatbot.dao.User;
 import com.opendata.chatbot.dao.WeatherForecastDto;
-import com.opendata.chatbot.entity.*;
-import com.opendata.chatbot.errorHandler.ErrorMessage;
-import com.opendata.chatbot.repository.OpenDataRepo;
+import com.opendata.chatbot.entity.Event;
+import com.opendata.chatbot.entity.EventWrapper;
+import com.opendata.chatbot.entity.Messages;
+import com.opendata.chatbot.entity.ReplyMessage;
 import com.opendata.chatbot.service.*;
 import com.opendata.chatbot.util.HeadersUtil;
 import com.opendata.chatbot.util.JsonConverter;
@@ -25,9 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 

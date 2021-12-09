@@ -9,7 +9,7 @@ import java.util.List;
 public interface OpenDataCwb {
     String AllData(String url);
 
-    List<Location> cityCwb(String city);
+    void cityCwb();
 
-    void weatherForecast(String city);
+    void weatherForecast(String locationsName, List<Location> locationList);
 }
