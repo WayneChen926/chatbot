@@ -5,11 +5,12 @@
 
 ### 使用教學
 - 在內容打上地區會回覆您，該地區的天氣預報。
+
 ![](https://i.imgur.com/yXD4lbt.png)
 
 - 還可以使用location，找到你所在的城市區域，進行天氣預報。
+
 ![](https://i.imgur.com/HJTymoq.jpg)
-![](https://i.imgur.com/DjzYEno.jpg)
 
 ### QR code
 - 有興趣可以掃以下QR code 使用看看
