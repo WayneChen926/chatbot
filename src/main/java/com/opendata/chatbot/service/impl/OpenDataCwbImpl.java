@@ -89,6 +89,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     public void weatherForecast(String locationsName, List<Location> locationList) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
         var district = new AtomicReference<String>(null);
+        String city = locationsName.replace("臺","台");
         var n = new AtomicInteger();
         locationList.forEach(location -> {
             district.set(location.getLocationName());
@@ -114,13 +115,13 @@ public class OpenDataCwbImpl implements OpenDataCwb {
                 weatherForecastList.add(weatherForecast);
             });
             var weatherForecastDto = new WeatherForecastDto();
-            var w = openDataRepo.findByDistrictAndCity(district.get(), locationsName);
+            var w = openDataRepo.findByDistrictAndCity(district.get(), city);
             if (w != null) {
                 weatherForecastDto.setId(w.getId());
             } else {
                 weatherForecastDto.setId(UUID.randomUUID().toString());
             }
-            weatherForecastDto.setCity(locationsName);
+            weatherForecastDto.setCity(city);
             weatherForecastDto.setDistrict(district.get());
             weatherForecastDto.setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             // 加入新數據
