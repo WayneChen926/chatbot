@@ -28,7 +28,7 @@ spring:
       secretmanager:
         enabled: true
   quartz:
-    cron: 0 0 */2 * * ?
+    cron: 0 0 */1 * * ?
     jobName: openDataTask
     jobGroupName: OpenDataTaskImpl
   boot:
