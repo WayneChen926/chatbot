@@ -7,14 +7,15 @@ import com.opendata.chatbot.entity.WeatherForecast;
 import com.opendata.chatbot.repository.OpenDataRepo;
 import com.opendata.chatbot.service.OpenDataCwb;
 import com.opendata.chatbot.util.JsonConverter;
-import com.opendata.chatbot.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +36,9 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Lookup
     private WeatherForecast getWeatherForecast() {
         return new WeatherForecast();
@@ -44,7 +48,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     public String AllData(String url) {
         String body = null;
         try {
-            body = RestTemplateUtil.GetNotValueTemplate(url).getBody();
+            body = restTemplate.getForEntity(URI.create(url), String.class).getBody();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Base64 decode Error :{}", e.getMessage());
@@ -54,6 +58,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Override
     public void cityCwb() {
+        System.gc();
         var locationList = new LinkedList<Location>();
         var url = new String(Base64.getDecoder().decode(cwbUrl), StandardCharsets.UTF_8);
         for (int i = 1; i <= 87; i += 4) {
@@ -112,6 +117,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Override
     public void weatherForecast(String locationsName, List<Location> locationList) {
+        System.gc();
         var weatherForecastList = new ArrayList<WeatherForecast>();
         var district = new AtomicReference<String>(null);
         String city = locationsName.replace("臺", "台");

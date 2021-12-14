@@ -31,6 +31,7 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: '2.5.4'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-amqp', version: '2.6.1'
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.0'
+	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 //	implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.16.5'
 	implementation group: 'redis.clients', name: 'jedis', version: '3.7.0'
 	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))

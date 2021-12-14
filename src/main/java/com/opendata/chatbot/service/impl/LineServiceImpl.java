@@ -9,15 +9,17 @@ import com.opendata.chatbot.entity.ReplyMessage;
 import com.opendata.chatbot.service.*;
 import com.opendata.chatbot.util.HeadersUtil;
 import com.opendata.chatbot.util.JsonConverter;
-import com.opendata.chatbot.util.RestTemplateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -58,6 +60,9 @@ public class LineServiceImpl implements LineService {
     private Event event;
 
     @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
     private OpenDataCwb openDataCwbImpl;
 
     @Autowired
@@ -80,6 +85,7 @@ public class LineServiceImpl implements LineService {
             // 驗證line傳過來的訊息
             if (validateLineHeader(requestBody, line_headers)) {
                 log.info("驗證成功");
+                System.gc();
                 replyMessage(requestBody);
             } else {
                 throw new RuntimeException("validateLineHeader line_headers validate Error");
@@ -163,7 +169,8 @@ public class LineServiceImpl implements LineService {
                 messages.setType("text");
                 messages.setText("無法解析內容");
                 messagesList.add(messages);
-                RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(new ReplyMessage(event.getReplyToken(), messagesList)), headers);
+                restTemplate.exchange(url, HttpMethod.POST,
+                        new HttpEntity<>(JsonConverter.toJsonString(new ReplyMessage(event.getReplyToken(), messagesList)), headers), String.class);
             }
         });
 
@@ -185,13 +192,15 @@ public class LineServiceImpl implements LineService {
                 messagesList.add(messages);
             });
             ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
-            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+            return restTemplate.exchange(url, HttpMethod.POST,
+                    new HttpEntity<>(JsonConverter.toJsonString(replyMessage), headers), String.class);
         } else if (low.size() == 0) {
             var messages = getMessages();
             messages.setType("text");
             messages.setText("無法解析輸入內容，請輸入地區。Ex: 士林區、羅東鎮、礁溪鄉、宜蘭市等");
             messagesList.add(messages);
-            return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(new ReplyMessage(replyToken, messagesList)), headers);
+            return restTemplate.exchange(url, HttpMethod.POST,
+                    new HttpEntity<>(JsonConverter.toJsonString(new ReplyMessage(replyToken, messagesList)), headers), String.class);
         } else {
             // 單比結果
             var openData = low.get(0);
@@ -200,7 +209,8 @@ public class LineServiceImpl implements LineService {
         }
         ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
 
-        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+        return restTemplate.exchange(url, HttpMethod.POST,
+                new HttpEntity<>(JsonConverter.toJsonString(replyMessage), headers), String.class);
     }
 
     @Override
@@ -218,7 +228,8 @@ public class LineServiceImpl implements LineService {
 
         ReplyMessage replyMessage = new ReplyMessage(replyToken, messagesList);
 
-        return RestTemplateUtil.PostTemplate(url, JsonConverter.toJsonString(replyMessage), headers);
+        return restTemplate.exchange(url, HttpMethod.POST,
+                new HttpEntity<>(JsonConverter.toJsonString(replyMessage), headers), String.class);
     }
 
     @Override
