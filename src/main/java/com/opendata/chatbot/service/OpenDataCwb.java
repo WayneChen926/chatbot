@@ -9,6 +9,8 @@ import java.util.List;
 public interface OpenDataCwb {
     String AllData(String url);
 
+    String replaceVariable(String url, String[] vars);
+
     void cityCwb();
 
     void weatherForecast(String locationsName, List<Location> locationList);

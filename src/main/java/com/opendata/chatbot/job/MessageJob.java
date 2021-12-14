@@ -16,7 +16,10 @@ import java.util.Date;
 public class MessageJob extends QuartzJobBean {
 
     @Autowired
-    OpenDataTask openDataTaskImpl;
+    private OpenDataTask openDataTaskImpl;
+
+    @Autowired
+    private OpenDataTask wakeUpHerokuTaskImpl;
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -36,6 +39,8 @@ public class MessageJob extends QuartzJobBean {
 
         if (jobGroupName.equals("openDataTaskImpl")) {
             openDataTaskImpl.doRun();
+        }else if(jobGroupName.equals("wakeUpHerokuImpl")){
+            wakeUpHerokuTaskImpl.doRun();
         }
     }
 }

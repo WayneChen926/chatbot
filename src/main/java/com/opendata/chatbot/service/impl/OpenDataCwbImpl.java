@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class OpenDataCwbImpl implements OpenDataCwb {
 
     @Value("${spring.boot.openCWB.cwbUrl}")
-    private String[] cwbUrl;
+    private String cwbUrl;
 
     @Autowired
     private OpenDataRepo openDataRepo;
@@ -44,7 +44,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     public String AllData(String url) {
         String body = null;
         try {
-            body = RestTemplateUtil.GetNotValueTemplate(new String(Base64.getDecoder().decode(url), StandardCharsets.UTF_8)).getBody();
+            body = RestTemplateUtil.GetNotValueTemplate(url).getBody();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Base64 decode Error :{}", e.getMessage());
@@ -55,8 +55,13 @@ public class OpenDataCwbImpl implements OpenDataCwb {
     @Override
     public void cityCwb() {
         var locationList = new LinkedList<Location>();
-        Arrays.stream(cwbUrl).forEach(url -> {
-            rabbitTemplate.convertAndSend("tpu.queue", url,
+        var url = new String(Base64.getDecoder().decode(cwbUrl), StandardCharsets.UTF_8);
+        for (int i = 1; i <= 87; i += 4) {
+            var s = String.format("%03d", i);
+
+            var openDataCwbUrl = replaceVariable(url, new String[]{s});
+
+            rabbitTemplate.convertAndSend("tpu.queue", openDataCwbUrl,
                     correlationData -> {
                         correlationData.getMessageProperties().setDelay(2000);
                         return correlationData;
@@ -64,7 +69,7 @@ public class OpenDataCwbImpl implements OpenDataCwb {
             Center center = new Center();
             try {
                 Thread.sleep(2000);
-                center = JsonConverter.toObject(AllData(url), Center.class);
+                center = JsonConverter.toObject(AllData(openDataCwbUrl), Center.class);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -82,14 +87,34 @@ public class OpenDataCwbImpl implements OpenDataCwb {
             weatherForecast(city, locationList);
             // 清空
             locationList.clear();
-        });
+        }
     }
+
+    @Override
+    public String replaceVariable(String url, String[] vars) {
+        int countVarInUrl = 0;
+        String urlChk = url;
+
+        while (urlChk.contains("$")) {
+            int pos = urlChk.indexOf("$");
+            urlChk = urlChk.substring(pos + 1);
+            countVarInUrl++;
+        }
+        if (countVarInUrl != vars.length) {
+            log.error("openData Url Replace Error");
+        }
+        for (String var : vars) {
+            url = url.replaceFirst("\\$", var);
+        }
+        return url;
+    }
+
 
     @Override
     public void weatherForecast(String locationsName, List<Location> locationList) {
         var weatherForecastList = new ArrayList<WeatherForecast>();
         var district = new AtomicReference<String>(null);
-        String city = locationsName.replace("臺","台");
+        String city = locationsName.replace("臺", "台");
         var n = new AtomicInteger();
         locationList.forEach(location -> {
             district.set(location.getLocationName());

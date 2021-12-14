@@ -49,8 +49,8 @@ public class RoutineJobServiceImpl implements RoutineJobService, BeanPostProcess
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if(bean instanceof OpenDataTask) {
-            openDataTaskList.add((OpenDataTask)bean);
+        if (bean instanceof OpenDataTask) {
+            openDataTaskList.add((OpenDataTask) bean);
         }
         return bean;
     }

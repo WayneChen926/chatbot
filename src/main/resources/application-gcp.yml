@@ -1,0 +1,57 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: UTF-8
+spring:
+# mongo 設定
+  data:
+    mongodb:
+      uri: ${sm://mongodUri}
+# rabbitmq 設定
+  rabbitmq:
+    addresses: ${sm://rabbitmqUrl}
+# redis 設定
+  redis:
+    database: 0
+    host: ${sm://redisHost}
+    port: ${sm://redisPort}
+    password: ${sm://redisPassword}
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+  cloud:
+    gcp:
+      secretmanager:
+        enabled: true
+  quartz:
+    cron: 0 0 */2 * * ?
+    jobName: openDataTask
+    jobGroupName: OpenDataTaskImpl
+  boot:
+    aes:
+      key: ${sm://aesKey}
+    SecretManager:
+      bucket: ${sm://bucket}
+      serviceAccountKey: ${sm://serviceAccountKey}
+    openCWB:
+#       36小時 全台預報 location locationName 臺北市
+      datastore: ${sm://allWeatherForecast}
+#      臺北市 各區預報
+      cwbUrl: ${sm://taipeiWeatherForecast},${sm://newTaipeiWeatherForecast},${sm://taoyuanWeatherForecast},${sm://keelungWeatherForecast},${sm://yilanWeatherForecast},${sm://taichungWeatherForecast},${sm://hsinchuctWeatherForecast},${sm://hsinchuCityWeatherForecast},${sm://miaoliWeatherForecast},${sm://changhuaWeatherForecast},${sm://nantouWeatherForecast},${sm://yunlinWeatherForecast},${sm://chiayiCountyWeatherForecast},${sm://chiayiCityWeatherForecast},${sm://tainanWeatherForecast},${sm://kaohsiungWeatherForecast},${sm://pingtungWeatherForecast},${sm://taitungWeatherForecast},${sm://hualienWeatherForecast},${sm://penghuWeatherForecast},${sm://kinmenWeatherForecast},${sm://matsuLslandsWeatherForecast}
+  line:
+    replyUrl: ${sm://replyUrl}
+    channelSecret: ${sm://channelSecret}
+    channelToken: ${sm://channelToken}
+
+logging:
+  level:
+    root: info
+    org:
+      springframework:
+        web:
+          client:
+            RestTemplate: info
